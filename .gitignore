@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+
+# Source exam papers (copyrighted third-party content) -- never publish these
+HTML Exams/
+preview_*.html
