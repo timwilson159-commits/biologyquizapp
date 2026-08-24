@@ -44,6 +44,9 @@ def esc(s):
 with open(QUESTIONS_PATH, encoding="utf-8") as f:
     questions = json.load(f)
 
+for i, q in enumerate(questions):
+    q.setdefault("source_ref", f"#{i+1}")
+
 image_cache = {}
 def get_img(filename):
     if filename not in image_cache:

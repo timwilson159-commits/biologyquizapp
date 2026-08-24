@@ -28,13 +28,11 @@ create table if not exists questions (
   items jsonb,            -- ordering
   answer jsonb not null,
   hint text,
-  active boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 create index if not exists idx_questions_module_inquiry on questions (module_id, inquiry_id);
-create index if not exists idx_questions_active on questions (active);
 
 -- ─── QUESTION FLAGS ─────────────────────────────────────────────────────────
 create table if not exists question_flags (

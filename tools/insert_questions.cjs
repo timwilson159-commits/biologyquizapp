@@ -63,7 +63,6 @@ async function uploadImage(examFolder, examSlug, filename) {
       items: q.items || null,
       answer: q.answer,
       hint: q.hint || null,
-      active: false,
     });
   }
 

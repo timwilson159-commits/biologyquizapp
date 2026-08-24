@@ -31,14 +31,15 @@ and 12 extended-response marking criteria as the original hand-built pass).
    step) and its own verify agent (adversarially rechecks against the same
    raw chunk). Returns `{ confirmed: [...], skipped: [...] }`.
 
-3. **Insert into Supabase** (as inactive, for review):
+3. **Insert into Supabase** (goes live immediately -- there's no draft/active
+   state, so review the preview from step 4 before running this):
    ```
    node tools/insert_questions.cjs <confirmed.json> "<examFolder>" <exam-slug>
    ```
    Uploads each unique referenced image to the `question-images` storage
-   bucket once, then bulk-inserts all confirmed questions with `active: false`.
+   bucket once, then bulk-inserts all confirmed questions.
 
-4. **Build a preview** to sanity-check before/while reviewing in the admin panel:
+4. **Build a preview** to sanity-check before inserting:
    ```
    python tools/build_preview.py "<examFolder>" <confirmed.json> <out.html> "<Display Title>"
    ```

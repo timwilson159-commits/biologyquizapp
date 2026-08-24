@@ -33,12 +33,12 @@ Opens at `http://localhost:5173`.
 - Change `ADMIN_PASSWORD` in `src/App.jsx` (currently `admin123`).
 - Update `SCHOOL_NAME` in `src/App.jsx` if you want your school's name in the header.
 - Log in as admin → **Students** tab → add students (single or bulk paste).
-- Log in as admin → **Questions** tab → pick a module + inquiry question → add questions (single or bulk JSON import). Questions are added **inactive** by default — tick "Active" (or the checkbox in the table) once you're happy with them, so they go live to students.
+- Log in as admin → **Questions** tab → pick a module + inquiry question → add questions (single or bulk JSON import). Every question is live to students immediately — there's no draft/review step, so double-check content before saving.
 
 ## How it works (quick reference)
 
 - **One flat question bank per inquiry question** — no more manually-numbered quizzes. Students always pick how many questions they want to practise.
-- Three practice scopes, all pulling a random subset from the active question pool: an **inquiry question** (min 5), a **whole module** (min 20, max 100), or the **whole year** (min 20, max 100).
+- Three practice scopes, all pulling a random subset from the question pool: an **inquiry question** (min 5), a **whole module** (min 20, max 100), or the **whole year** (min 20, max 100).
 - Feedback is instant, question-by-question — no waiting on a teacher to "release" answers. This is a revision tool, not a test.
 - Every attempt is saved permanently (`attempts` table), so students build a visible practice history and reattempt as often as they like.
 - Admin → **Progress** tab shows practice volume per student (attempts, questions practised, average score) rather than single quiz grades.

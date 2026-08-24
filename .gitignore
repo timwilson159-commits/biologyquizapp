@@ -4,4 +4,7 @@ dist
 
 # Source exam papers (copyrighted third-party content) -- never publish these
 HTML Exams/
+
+# Generated review artifacts -- local only, not part of the app
 preview_*.html
+*_preview.html

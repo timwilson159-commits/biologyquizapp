@@ -241,12 +241,11 @@ function gradientColor(pct) {
   return { bg: bgAlpha, text: textColor, border: `rgba(${r},${g},${b},0.4)` };
 }
 
-// Question pool for a given scope, active questions only (student-facing)
+// Question pool for a given scope -- every question in the bank is usable
 function poolForScope(questions, scopeType, scopeId) {
-  const active = questions.filter(q => q.active);
-  if (scopeType === "inquiry") return active.filter(q => q.inquiry_id === scopeId);
-  if (scopeType === "module") return active.filter(q => q.module_id === scopeId);
-  if (scopeType === "year") return active;
+  if (scopeType === "inquiry") return questions.filter(q => q.inquiry_id === scopeId);
+  if (scopeType === "module") return questions.filter(q => q.module_id === scopeId);
+  if (scopeType === "year") return questions;
   return [];
 }
 
@@ -274,7 +273,7 @@ function useQuestions() {
     const row = {
       module_id: moduleId, inquiry_id: inquiryId, type: q.type, prompt: q.prompt, image: q.image || "",
       options: q.options || null, bank: q.bank || null, pairs: q.pairs || null, items: q.items || null,
-      answer: q.answer, hint: q.hint || null, active: q.active !== undefined ? q.active : false
+      answer: q.answer, hint: q.hint || null
     };
     const { data, error } = await supabase.from("questions").insert(row).select().single();
     if (error) { console.error("Add question error:", error); return null; }
@@ -286,7 +285,7 @@ function useQuestions() {
     const rows = list.map(q => ({
       module_id: moduleId, inquiry_id: inquiryId, type: q.type, prompt: q.prompt, image: q.image || "",
       options: q.options || null, bank: q.bank || null, pairs: q.pairs || null, items: q.items || null,
-      answer: q.answer, hint: q.hint || null, active: false
+      answer: q.answer, hint: q.hint || null
     }));
     const { data, error } = await supabase.from("questions").insert(rows).select();
     if (error) { console.error("Bulk add questions error:", error); return false; }
@@ -970,7 +969,7 @@ async function submitFlag(questionId, userCode, reasons) {
 function ModulePage({ moduleDef, questions, user, onBack, onLaunch }) {
   const [picker, setPicker] = useState(null); // { scopeType, scopeId, scopeLabel, title, subtitle }
 
-  const moduleActive = questions.filter(q => q.active && q.module_id === moduleDef.id);
+  const moduleActive = questions.filter(q => q.module_id === moduleDef.id);
 
   return (
     <div style={S.cont}>
@@ -993,7 +992,7 @@ function ModulePage({ moduleDef, questions, user, onBack, onLaunch }) {
 
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         {moduleDef.inquiries.map(inq => {
-          const bank = questions.filter(q => q.active && q.inquiry_id === inq.id);
+          const bank = questions.filter(q => q.inquiry_id === inq.id);
           return (
             <div key={inq.id} style={{ ...S.card, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
               <div style={{ flex: "1 1 260px" }}>
@@ -1026,7 +1025,7 @@ function ModulePage({ moduleDef, questions, user, onBack, onLaunch }) {
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
 function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch }) {
   const [yearPicker, setYearPicker] = useState(false);
-  const totalActive = questions.filter(q => q.active).length;
+  const totalQuestions = questions.length;
 
   return (
     <div style={S.cont}>
@@ -1041,14 +1040,14 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
       <div style={{ ...S.card, marginBottom: "1.75rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", background: "#1a1a1a", color: "#fff", border: "none" }}>
         <div>
           <h3 style={{ margin: "0 0 4px", fontSize: 16, color: "#fff" }}>Whole Year Quiz</h3>
-          <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.65)" }}>{totalActive} questions across every module</p>
+          <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.65)" }}>{totalQuestions} questions across every module</p>
         </div>
         <button style={{ ...S.btn, background: "#fff", color: "#1a1a1a" }} onClick={() => setYearPicker(true)}>Start</button>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1.25rem" }}>
         {MODULE_DEFS.map(m => {
-          const active = questions.filter(q => q.active && q.module_id === m.id);
+          const moduleQuestions = questions.filter(q => q.module_id === m.id);
           return (
             <div key={m.id} style={{ ...S.card, cursor: "pointer", borderTop: `3px solid ${m.color}`, transition: "all 0.18s" }}
               onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.09)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
@@ -1057,7 +1056,7 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
               <div style={{ fontSize: 28, marginBottom: 8 }}>{m.icon}</div>
               <h3 style={{ margin: "0 0 8px", fontSize: 16 }}>{m.title}</h3>
               <p style={{ margin: "0 0 14px", fontSize: 13, color: "#777", lineHeight: 1.5 }}>{m.description}</p>
-              <p style={{ margin: 0, fontSize: 12, color: "#aaa" }}>{active.length} questions · {m.inquiries.length} inquiry questions</p>
+              <p style={{ margin: 0, fontSize: 12, color: "#aaa" }}>{moduleQuestions.length} questions · {m.inquiries.length} inquiry questions</p>
             </div>
           );
         })}
@@ -1066,7 +1065,7 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
       {yearPicker && (
         <CountPickerModal
           title="Whole Year Quiz" subtitle="A random mix from every module" scopeType="year"
-          poolSize={totalActive}
+          poolSize={totalQuestions}
           onCancel={() => setYearPicker(false)}
           onStart={count => { onLaunch({ scopeType: "year", scopeId: "year", scopeLabel: "Whole Year Quiz", color: "#1a1a1a", count }); setYearPicker(false); }}
         />
@@ -1243,13 +1242,6 @@ function QuestionEditor({ question, onSave, onCancel }) {
         </div>
       )}
 
-      <div>
-        <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-          <input type="checkbox" checked={!!q.active} onChange={e => updateField("active", e.target.checked)} style={{ width: 18, height: 18 }} />
-          <span style={{ fontSize: 13, fontWeight: 600 }}>Active (visible to students)</span>
-        </label>
-      </div>
-
       <div style={{ display: "flex", gap: 10 }}>
         <button style={{ ...S.btn, ...S.btnPrimary, flex: 1, justifyContent: "center" }} onClick={() => onSave(q)}>Save Question</button>
         <button style={{ ...S.btn, ...S.btnOutline, flex: 1, justifyContent: "center" }} onClick={onCancel}>Cancel</button>
@@ -1320,7 +1312,7 @@ function AdminQuestions({ questions, questionsApi }) {
 
   const bankQuestions = questions.filter(q => q.inquiry_id === inquiryId);
 
-  const blankQuestion = { type: "multiple-choice", prompt: "", image: "", options: ["", "", "", ""], answer: "", active: false };
+  const blankQuestion = { type: "multiple-choice", prompt: "", image: "", options: ["", "", "", ""], answer: "" };
 
   const saveQuestion = async (q) => {
     if (editing && editing.id) await questionsApi.updateQuestion(editing.id, q);
@@ -1351,7 +1343,7 @@ function AdminQuestions({ questions, questionsApi }) {
 
       <div style={{ ...S.card, marginBottom: "1.25rem" }}>
         <p style={{ margin: "0 0 4px", fontSize: 13, color: "#666", fontStyle: "italic" }}>{findInquiry(inquiryId)?.question}</p>
-        <p style={{ margin: 0, fontSize: 12, color: "#aaa" }}>{bankQuestions.length} question{bankQuestions.length === 1 ? "" : "s"} in this bank ({bankQuestions.filter(q => q.active).length} active)</p>
+        <p style={{ margin: 0, fontSize: 12, color: "#aaa" }}>{bankQuestions.length} question{bankQuestions.length === 1 ? "" : "s"} in this bank</p>
       </div>
 
       <div style={{ display: "flex", gap: 10, marginBottom: "1.25rem" }}>
@@ -1365,7 +1357,6 @@ function AdminQuestions({ questions, questionsApi }) {
             <tr>
               <th style={S.th}>Prompt</th>
               <th style={S.th}>Type</th>
-              <th style={S.th}>Active</th>
               <th style={S.th}></th>
             </tr>
           </thead>
@@ -1375,9 +1366,6 @@ function AdminQuestions({ questions, questionsApi }) {
                 <td style={{ ...S.td, maxWidth: 360 }}>{q.prompt}</td>
                 <td style={S.td}>{q.type}</td>
                 <td style={S.td}>
-                  <input type="checkbox" checked={!!q.active} onChange={e => questionsApi.updateQuestion(q.id, { active: e.target.checked })} style={{ width: 18, height: 18, cursor: "pointer" }} />
-                </td>
-                <td style={S.td}>
                   <div style={{ display: "flex", gap: 6 }}>
                     <button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm }} onClick={() => setEditing(q)}>Edit</button>
                     <button style={{ ...S.btn, ...S.btnDanger, ...S.btnSm }} onClick={() => { if (confirm("Delete this question?")) questionsApi.deleteQuestion(q.id); }}>Delete</button>
@@ -1386,7 +1374,7 @@ function AdminQuestions({ questions, questionsApi }) {
               </tr>
             ))}
             {bankQuestions.length === 0 && (
-              <tr><td style={S.td} colSpan={4}><span style={{ color: "#aaa" }}>No questions yet for this inquiry question.</span></td></tr>
+              <tr><td style={S.td} colSpan={3}><span style={{ color: "#aaa" }}>No questions yet for this inquiry question.</span></td></tr>
             )}
           </tbody>
         </table>
@@ -1405,7 +1393,7 @@ function AdminQuestions({ questions, questionsApi }) {
         <div style={S.modal}>
           <div style={{ ...S.modalBox, maxWidth: 640 }}>
             <h3 style={{ margin: "0 0 6px" }}>Bulk Import Questions</h3>
-            <p style={{ fontSize: 13, color: "#666", margin: "0 0 12px" }}>Imports into <strong>{mod.title} → {inquiryId} {findInquiry(inquiryId)?.title}</strong>, added as inactive (review then activate). Paste a JSON array in this format:</p>
+            <p style={{ fontSize: 13, color: "#666", margin: "0 0 12px" }}>Imports into <strong>{mod.title} → {inquiryId} {findInquiry(inquiryId)?.title}</strong> and is immediately visible to students. Paste a JSON array in this format:</p>
             <pre style={{ background: "#f5f4f0", padding: 12, borderRadius: 8, fontSize: 11, overflowX: "auto", marginBottom: 12 }}>{FORMAT_GUIDE}</pre>
             <textarea value={bulkText} onChange={e => setBulkText(e.target.value)} style={{ ...S.input, minHeight: 160, fontFamily: "monospace", fontSize: 12, marginBottom: 10 }} placeholder="Paste JSON array here..." />
             {bulkErr && <p style={{ color: "#DC2626", fontSize: 13, margin: "0 0 10px" }}>{bulkErr}</p>}
