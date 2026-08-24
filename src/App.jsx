@@ -1046,10 +1046,12 @@ function Ordering({ q, ans, setAns, revealed }) {
   const [drag, setDrag] = useState(null);
   useEffect(() => { setAns(order); }, []);
   const move = (from, to) => { const n = [...order]; const [x] = n.splice(from, 1); n.splice(to, 0, x); setOrder(n); setAns(n); };
+  const moveUp = (i) => { if (i > 0) move(i, i - 1); };
+  const moveDown = (i) => { if (i < order.length - 1) move(i, i + 1); };
   return (
     <div>
       <QuestionImage src={q.image} />
-      <p style={{ fontSize: 13.5, color: C.muted, margin: "0 0 12px", fontWeight: 600 }}>Drag the rows into the correct order:</p>
+      <p style={{ fontSize: 13.5, color: C.muted, margin: "0 0 12px", fontWeight: 600 }}>Drag the rows into the correct order, or use the arrows:</p>
       {order.map((item, i) => {
         const ci = (q.answer || []).indexOf(item);
         const ok = revealed && i === ci;
@@ -1070,6 +1072,22 @@ function Ordering({ q, ans, setAns, revealed }) {
               color: ok ? C.good : bad ? C.bad : C.muted, fontSize: 12, fontWeight: 800,
             }}>{i + 1}</span>
             <span style={{ flex: 1, fontWeight: 600, color: C.ink, lineHeight: 1.45 }}>{item}</span>
+            {!revealed && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 3, flexShrink: 0 }}>
+                <button type="button" aria-label={`Move "${item}" up`} disabled={i === 0} onClick={() => moveUp(i)}
+                  style={{
+                    width: 26, height: 20, padding: 0, borderRadius: 6, border: `1px solid ${C.line}`, background: C.surface,
+                    color: i === 0 ? C.faint : C.body, fontSize: 11, lineHeight: 1, cursor: i === 0 ? "default" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT,
+                  }}>▲</button>
+                <button type="button" aria-label={`Move "${item}" down`} disabled={i === order.length - 1} onClick={() => moveDown(i)}
+                  style={{
+                    width: 26, height: 20, padding: 0, borderRadius: 6, border: `1px solid ${C.line}`, background: C.surface,
+                    color: i === order.length - 1 ? C.faint : C.body, fontSize: 11, lineHeight: 1, cursor: i === order.length - 1 ? "default" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT,
+                  }}>▼</button>
+              </div>
+            )}
             {!revealed && <span style={{ color: C.faint, fontSize: 17, cursor: "grab" }}>⠿</span>}
             {revealed && ok && <span style={{ color: C.good, fontSize: 14, fontWeight: 800 }}>✓</span>}
             {revealed && bad && <span style={{ ...S.badge, background: "rgba(255,255,255,.75)", color: C.bad, fontSize: 10.5 }}>should be #{ci + 1}</span>}
