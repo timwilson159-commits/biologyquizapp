@@ -72,6 +72,8 @@ const MODULE_DEFS = [
   }
 ];
 
+function moduleLabel(m) { return `Module ${m.id.split("-")[1]}: ${m.title}`; }
+
 function findModule(moduleId) { return MODULE_DEFS.find(m => m.id === moduleId); }
 function findInquiry(inquiryId) {
   for (const m of MODULE_DEFS) {
@@ -580,17 +582,16 @@ function DragDrop({ q, ans, setAns, revealed, seed }) {
   const cur = ans || {};
   const baseSeed = String(seed || "default");
   const items = seededShuffle((q.pairs || []).map(p => p.item), baseSeed + "-items");
-  const targets = seededShuffle((q.pairs || []).map(p => p.match), baseSeed + "-targets");
+  const uniqueTargets = [...new Set((q.pairs || []).map(p => p.match))];
+  const targets = seededShuffle(uniqueTargets, baseSeed + "-targets");
 
+  // Some questions legitimately map more than one item to the same match (e.g. two
+  // features both belonging to "Animal transport system"), so selecting a target
+  // must NOT unassign it from any other item that also needs it.
   const setMatch = (item, target) => {
     if (revealed) return;
     const next = { ...cur };
-    if (target) {
-      Object.keys(next).forEach(k => { if (next[k] === target) delete next[k]; });
-      next[item] = target;
-    } else {
-      delete next[item];
-    }
+    if (target) next[item] = target; else delete next[item];
     setAns(next);
   };
 
@@ -620,7 +621,14 @@ function DragDrop({ q, ans, setAns, revealed, seed }) {
                     border: "1.5px solid #d0cec6", fontSize: 14, fontFamily: "Lato", background: "#fff",
                     cursor: "pointer", color: selected ? "#1a1a1a" : "#aaa" }}>
                   <option value="">— select a match —</option>
-                  {targets.map(t => <option key={t} value={t}>{t}</option>)}
+                  {targets.map((t, ti) => {
+                    const usedElsewhere = Object.entries(cur).some(([k, v]) => k !== item && v === t);
+                    return (
+                      <option key={`${t}-${ti}`} value={t} style={{ background: usedElsewhere ? "#fef9c3" : "#dbeafe", color: "#1a1a1a" }}>
+                        {t}
+                      </option>
+                    );
+                  })}
                 </select>
               ) : (
                 <span style={{ flex: "2 1 200px", minWidth: 160, padding: "8px 12px", borderRadius: 6,
@@ -753,6 +761,11 @@ function CountPickerModal({ title, subtitle, scopeType, poolSize, onStart, onCan
   const min = Math.min(limits.min, max);
   const [count, setCount] = useState(Math.min(max, Math.max(min, limits.min)));
 
+  const countOptions = [];
+  for (let n = Math.ceil(min / 5) * 5; n <= max; n += 5) countOptions.push(n);
+  if (countOptions.length === 0 || countOptions[0] !== min) countOptions.unshift(min);
+  if (countOptions[countOptions.length - 1] !== max) countOptions.push(max);
+
   if (poolSize === 0) {
     return (
       <div style={S.modal}>
@@ -772,9 +785,15 @@ function CountPickerModal({ title, subtitle, scopeType, poolSize, onStart, onCan
         {subtitle && <p style={{ color: "#777", fontSize: 13, margin: "0 0 1.25rem" }}>{subtitle}</p>}
         <p style={{ fontSize: 12, color: "#aaa", margin: "0 0 1rem" }}>{poolSize} question{poolSize === 1 ? "" : "s"} available in the bank</p>
         <label style={S.label}>HOW MANY QUESTIONS? ({min}–{max})</label>
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: "1.75rem" }}>
-          <input type="range" min={min} max={max} value={count} onChange={e => setCount(Number(e.target.value))} style={{ flex: 1 }} />
-          <div style={{ width: 52, height: 42, borderRadius: 8, background: "#f0ede6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 16 }}>{count}</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: "1.75rem" }}>
+          {countOptions.map(n => (
+            <button key={n} onClick={() => setCount(n)}
+              style={{ minWidth: 48, padding: "9px 14px", borderRadius: 8, border: `1.5px solid ${count === n ? "#1a1a1a" : "#e5e3dc"}`,
+                background: count === n ? "#1a1a1a" : "#fff", color: count === n ? "#fff" : "#1a1a1a",
+                fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "Lato" }}>
+              {n}
+            </button>
+          ))}
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button style={{ ...S.btn, ...S.btnPrimary, flex: 1, justifyContent: "center" }} onClick={() => onStart(count)}>Start Practice</button>
@@ -811,13 +830,18 @@ function PracticeSession({ scopeType, scopeId, scopeLabel, color, pool, count, u
   }
 
   if (finished) {
+    const noneCompleted = finalScore.total === 0;
     const gc = gradientColor(finalScore.pct);
     return (
       <div style={S.cont}>
         <div style={{ ...S.card, textAlign: "center", padding: "3rem" }}>
-          <div style={{ width: 96, height: 96, borderRadius: "50%", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", background: gc.bg, fontSize: 26, fontWeight: 700, color: gc.text }}>{finalScore.pct}%</div>
-          <h2 style={{ margin: "0 0 6px" }}>{finalScore.pct >= 70 ? "Nice work!" : "Keep practising"}</h2>
-          <p style={{ color: "#777", margin: "0 0 24px" }}>{finalScore.correct} / {finalScore.total} correct</p>
+          <div style={{ width: 96, height: 96, borderRadius: "50%", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", background: gc.bg, fontSize: 26, fontWeight: 700, color: gc.text }}>
+            {noneCompleted ? "—" : `${finalScore.pct}%`}
+          </div>
+          <h2 style={{ margin: "0 0 6px" }}>{noneCompleted ? "No questions completed" : (finalScore.pct >= 70 ? "Nice work!" : "Keep practising")}</h2>
+          <p style={{ color: "#777", margin: "0 0 24px" }}>
+            {noneCompleted ? "Only completed questions are scored — try answering at least one next time." : `${finalScore.correct} / ${finalScore.total} correct`}
+          </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
             <button style={{ ...S.btn, ...S.btnPrimary, background: color }} onClick={onTryAgain}>Try Again</button>
             <button style={{ ...S.btn, ...S.btnOutline }} onClick={onExit}>Back</button>
@@ -841,7 +865,8 @@ function PracticeSession({ scopeType, scopeId, scopeLabel, color, pool, count, u
   const checkAnswer = () => setRevealedIds(p => ({ ...p, [q.id]: true }));
 
   const finishSession = async () => {
-    const score = calcScore(questions, answers);
+    const completedQuestions = questions.filter(qq => revealedIds[qq.id]);
+    const score = calcScore(completedQuestions, answers) || { correct: 0, total: 0, pct: null };
     setFinalScore(score);
     setFinished(true);
     await submitAttempt({
@@ -850,11 +875,25 @@ function PracticeSession({ scopeType, scopeId, scopeLabel, color, pool, count, u
     });
   };
 
-  const goNext = () => { if (isLast) finishSession(); else setIdx(i => i + 1); };
+  const submitSession = () => {
+    if (answeredCount < questions.length) {
+      const proceed = window.confirm(`You've completed ${answeredCount} of ${questions.length} questions. Submitting now will only mark and score the questions you've completed — the rest won't count. Submit anyway?`);
+      if (!proceed) return;
+    }
+    finishSession();
+  };
+
+  const nextLabel = needsCheck && !isRevealed ? "Check Answer" : (isLast ? "Finish" : "Next");
+  const nextDisabled = needsCheck && !isRevealed && !canCheck;
+
+  const goNext = () => {
+    if (needsCheck && !isRevealed) { if (canCheck) checkAnswer(); return; }
+    if (isLast) finishSession(); else setIdx(i => i + 1);
+  };
 
   return (
     <div style={S.cont}>
-      <button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm, marginBottom: "1.5rem" }} onClick={onExit}>Back</button>
+      <button style={{ ...S.btn, ...S.btnPrimary, ...S.btnSm, background: "#DC2626", marginBottom: "1.5rem" }} onClick={submitSession}>Submit Quiz</button>
       <div style={{ ...S.card, marginBottom: "1.25rem", borderLeft: `4px solid ${color}` }}>
         <p style={{ margin: "0 0 2px", fontSize: 11, color: "#aaa", fontWeight: 700, letterSpacing: 0.5 }}>{scopeLabel.toUpperCase()}</p>
         <h2 style={{ margin: "0 0 4px", fontSize: 19 }}>Practice · {questions.length} questions</h2>
@@ -885,11 +924,6 @@ function PracticeSession({ scopeType, scopeId, scopeLabel, color, pool, count, u
         <p style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.45, margin: "0 0 1.25rem" }}>{q.prompt}</p>
         <QuestionRenderer q={q} ans={answers[q.id]} setAns={setAns} revealed={isRevealed} seed={`${seed}-${q.id}`} />
 
-        {needsCheck && !isRevealed && (
-          <button style={{ ...S.btn, ...S.btnPrimary, background: color, marginTop: 14 }} disabled={!canCheck} onClick={checkAnswer}>
-            Check Answer
-          </button>
-        )}
         {isRevealed && (q.type === "drag-drop" || q.type === "ordering") && (
           <p style={{ fontSize: 13, marginTop: 12, fontWeight: 600, color: calcQuestionCorrect(q, answers[q.id]) ? "#065f46" : "#7f1d1d" }}>
             {calcQuestionCorrect(q, answers[q.id]) ? "Correct!" : `Correct answer: ${formatCorrectAnswer(q)}`}
@@ -904,8 +938,8 @@ function PracticeSession({ scopeType, scopeId, scopeLabel, color, pool, count, u
           onClick={() => setFlagModal(true)}>
           🚩 {flaggedQuestions?.[q.id]?.reasons?.length ? "Flagged" : "Flag"}
         </button>
-        <button style={{ ...S.btn, ...S.btnPrimary, background: isLast ? "#DC2626" : color }} onClick={goNext}>
-          {isLast ? "Finish" : "Next"}
+        <button style={{ ...S.btn, ...S.btnPrimary, background: (isLast && (!needsCheck || isRevealed)) ? "#DC2626" : color }} disabled={nextDisabled} onClick={goNext}>
+          {nextLabel}
         </button>
       </div>
 
@@ -976,7 +1010,7 @@ function ModulePage({ moduleDef, questions, user, onBack, onLaunch }) {
     <div style={S.cont}>
       <button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm, marginBottom: "1.5rem" }} onClick={onBack}>← All Modules</button>
       <div style={{ borderLeft: `4px solid ${moduleDef.color}`, paddingLeft: "1rem", marginBottom: "1.5rem" }}>
-        <h1 style={{ margin: "0 0 6px", fontSize: 26 }}>{moduleDef.icon} {moduleDef.title}</h1>
+        <h1 style={{ margin: "0 0 6px", fontSize: 26 }}>{moduleDef.icon} {moduleLabel(moduleDef)}</h1>
         <p style={{ margin: 0, color: "#666", fontSize: 14 }}>{moduleDef.description}</p>
       </div>
 
@@ -1032,6 +1066,7 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
     <div style={S.cont}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: "1.75rem" }}>
         <div>
+          <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#1D9E75" }}>Welcome back, {(user.name || "").trim().split(/\s+/)[0]}! 👋</p>
           <h1 style={{ margin: "0 0 6px", fontSize: 26 }}>🧬 Biology</h1>
           <p style={{ margin: 0, color: "#666", fontSize: 14 }}>Pick a module to practise, or jump into a whole-year mix.</p>
         </div>
@@ -1055,7 +1090,7 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
               onMouseLeave={e => { e.currentTarget.style.boxShadow = ""; e.currentTarget.style.transform = ""; }}
               onClick={() => onSelectModule(m)}>
               <div style={{ fontSize: 28, marginBottom: 8 }}>{m.icon}</div>
-              <h3 style={{ margin: "0 0 8px", fontSize: 16 }}>{m.title}</h3>
+              <h3 style={{ margin: "0 0 8px", fontSize: 16 }}>{moduleLabel(m)}</h3>
               <p style={{ margin: "0 0 14px", fontSize: 13, color: "#777", lineHeight: 1.5 }}>{m.description}</p>
               <p style={{ margin: 0, fontSize: 12, color: "#aaa" }}>{moduleQuestions.length} questions · {m.inquiries.length} inquiry questions</p>
             </div>
