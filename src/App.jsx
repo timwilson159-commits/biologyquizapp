@@ -478,7 +478,8 @@ function QuestionImage({ src }) {
 
 // ─── QUESTION RENDERERS ───────────────────────────────────────────────────────
 function MCQ({ q, ans, setAns, revealed, seed }) {
-  const shuffledOptions = seededShuffle(q.options || [], seed || "default");
+  const fallbackOptions = q.type === "true-false" ? ["True", "False"] : [];
+  const shuffledOptions = seededShuffle(q.options?.length ? q.options : fallbackOptions, seed || "default");
   return (
     <>
       <QuestionImage src={q.image} />
