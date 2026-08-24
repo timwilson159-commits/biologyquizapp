@@ -30,7 +30,7 @@ Opens at `http://localhost:5173`.
 
 ## 4. Before students use it
 
-- Change `ADMIN_PASSWORD` in `src/App.jsx` (currently `admin123`).
+- Run [`admin_password_setup.sql`](admin_password_setup.sql) once in the SQL editor, then log in to Admin (password starts as `admin123`) and use **Change Password** to set your own.
 - Update `SCHOOL_NAME` in `src/App.jsx` if you want your school's name in the header.
 - Log in as admin → **Students** tab → add students (single or bulk paste).
 - Log in as admin → **Questions** tab → pick a module + inquiry question → add questions (single or bulk JSON import). Every question is live to students immediately — there's no draft/review step, so double-check content before saving.

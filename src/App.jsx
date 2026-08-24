@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = "admin123"; // TODO: change before going live
+const ADMIN_PASSWORD = "admin123"; // fallback only -- real password lives in Supabase (app_settings), see admin_password_setup.sql
 const SCHOOL_NAME = "Biology Quiz Centre";
 const FLAG_REASONS = [
   { id: "confusing", label: "Confusing wording", icon: "😕" },
@@ -442,6 +442,39 @@ function useFlags() {
   };
 
   return { flags, loading, addFlag, resolveFlag, reload };
+}
+
+// Admin password lives in Supabase (app_settings table) so it can be changed at
+// runtime instead of being hardcoded. Falls back to ADMIN_PASSWORD if the table
+// hasn't been created yet (see admin_password_setup.sql).
+function useAdminSettings() {
+  const [adminPassword, setAdminPassword] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [migrationMissing, setMigrationMissing] = useState(false);
+
+  const reload = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from("app_settings").select("admin_password").eq("id", 1).single();
+    if (error || !data) {
+      setAdminPassword(ADMIN_PASSWORD);
+      setMigrationMissing(true);
+    } else {
+      setAdminPassword(data.admin_password);
+      setMigrationMissing(false);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { reload(); }, []);
+
+  const updatePassword = async (newPassword) => {
+    const { error } = await supabase.from("app_settings").update({ admin_password: newPassword, updated_at: new Date().toISOString() }).eq("id", 1);
+    if (error) { console.error("Update admin password error:", error); return false; }
+    setAdminPassword(newPassword);
+    return true;
+  };
+
+  return { adminPassword, loading, migrationMissing, updatePassword, reload };
 }
 
 // ─── IMAGE MODAL / QUESTION IMAGE ─────────────────────────────────────────────
@@ -1288,10 +1321,22 @@ function QuestionEditor({ question, onSave, onCancel }) {
 
 // ─── ADMIN PANEL ──────────────────────────────────────────────────────────────
 function AdminPanel({ questions, questionsApi, users, usersApi, flagsApi, onBack }) {
+  const adminSettings = useAdminSettings();
   const [authed, setAuthed] = useState(false);
   const [pw, setPw] = useState("");
   const [pwErr, setPwErr] = useState("");
   const [tab, setTab] = useState("questions");
+  const [pwModalOpen, setPwModalOpen] = useState(false);
+
+  if (adminSettings.loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f5f4f0", color: "#666" }}>
+        Loading...
+      </div>
+    );
+  }
+
+  const tryLogin = () => pw === adminSettings.adminPassword ? setAuthed(true) : setPwErr("Incorrect password.");
 
   if (!authed) {
     return (
@@ -1300,11 +1345,10 @@ function AdminPanel({ questions, questionsApi, users, usersApi, flagsApi, onBack
           <h2 style={{ margin: "0 0 1rem" }}>Admin Access</h2>
           <input type="password" style={{ ...S.input, marginBottom: 10 }} placeholder="Password" value={pw}
             onChange={e => setPw(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && (pw === ADMIN_PASSWORD ? setAuthed(true) : setPwErr("Incorrect password."))} />
+            onKeyDown={e => e.key === "Enter" && tryLogin()} />
           {pwErr && <p style={{ color: "#DC2626", fontSize: 13, margin: "0 0 10px" }}>{pwErr}</p>}
           <div style={{ display: "flex", gap: 10 }}>
-            <button style={{ ...S.btn, ...S.btnPrimary, flex: 1, justifyContent: "center" }}
-              onClick={() => pw === ADMIN_PASSWORD ? setAuthed(true) : setPwErr("Incorrect password.")}>Enter</button>
+            <button style={{ ...S.btn, ...S.btnPrimary, flex: 1, justifyContent: "center" }} onClick={tryLogin}>Enter</button>
             <button style={{ ...S.btn, ...S.btnOutline, flex: 1, justifyContent: "center" }} onClick={onBack}>Back</button>
           </div>
         </div>
@@ -1316,7 +1360,10 @@ function AdminPanel({ questions, questionsApi, users, usersApi, flagsApi, onBack
     <div style={S.cont}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: 10 }}>
         <h1 style={{ margin: 0, fontSize: 24 }}>Admin Panel</h1>
-        <button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm }} onClick={onBack}>Exit Admin</button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm }} onClick={() => setPwModalOpen(true)}>Change Password</button>
+          <button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm }} onClick={onBack}>Exit Admin</button>
+        </div>
       </div>
       <div style={{ display: "flex", gap: 6, marginBottom: "1.5rem", flexWrap: "wrap" }}>
         <button style={S.tabBtn(tab === "questions")} onClick={() => setTab("questions")}>Questions</button>
@@ -1331,6 +1378,72 @@ function AdminPanel({ questions, questionsApi, users, usersApi, flagsApi, onBack
       {tab === "flags" && <AdminFlags flagsApi={flagsApi} questions={questions} questionsApi={questionsApi} />}
       {tab === "students" && <AdminStudents users={users} usersApi={usersApi} />}
       {tab === "progress" && <AdminProgress users={users} />}
+
+      {pwModalOpen && <ChangePasswordModal adminSettings={adminSettings} onClose={() => setPwModalOpen(false)} />}
+    </div>
+  );
+}
+
+function ChangePasswordModal({ adminSettings, onClose }) {
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [err, setErr] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  const save = async () => {
+    setErr("");
+    if (current !== adminSettings.adminPassword) { setErr("Current password is incorrect."); return; }
+    if (next.length < 6) { setErr("New password must be at least 6 characters."); return; }
+    if (next !== confirm) { setErr("New password and confirmation don't match."); return; }
+    const ok = await adminSettings.updatePassword(next);
+    if (!ok) {
+      setErr(adminSettings.migrationMissing
+        ? "Couldn't save — the app_settings table doesn't exist yet. Run admin_password_setup.sql in the Supabase SQL editor first."
+        : "Couldn't save the new password — check the console for details.");
+      return;
+    }
+    setSaved(true);
+  };
+
+  return (
+    <div style={S.modal}>
+      <div style={S.modalBox}>
+        <h3 style={{ margin: "0 0 14px" }}>Change Admin Password</h3>
+        {saved ? (
+          <>
+            <p style={{ color: "#065f46", fontSize: 14, margin: "0 0 1.5rem" }}>Password updated. Use your new password next time you enter the admin panel.</p>
+            <button style={{ ...S.btn, ...S.btnPrimary, width: "100%", justifyContent: "center" }} onClick={onClose}>Done</button>
+          </>
+        ) : (
+          <>
+            {adminSettings.migrationMissing && (
+              <p style={{ fontSize: 12, color: "#92400e", background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 8, padding: "8px 10px", margin: "0 0 1rem" }}>
+                One-time setup needed: run <code>admin_password_setup.sql</code> in the Supabase SQL editor before this can be saved.
+              </p>
+            )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: "1.25rem" }}>
+              <div>
+                <label style={S.label}>Current Password</label>
+                <input type="password" style={S.input} value={current} onChange={e => setCurrent(e.target.value)} />
+              </div>
+              <div>
+                <label style={S.label}>New Password</label>
+                <input type="password" style={S.input} value={next} onChange={e => setNext(e.target.value)} placeholder="At least 6 characters" />
+              </div>
+              <div>
+                <label style={S.label}>Confirm New Password</label>
+                <input type="password" style={S.input} value={confirm} onChange={e => setConfirm(e.target.value)} />
+              </div>
+            </div>
+            {err && <p style={{ color: "#DC2626", fontSize: 13, margin: "0 0 12px" }}>{err}</p>}
+            <div style={{ display: "flex", gap: 10 }}>
+              <button style={{ ...S.btn, ...S.btnPrimary, flex: 1, justifyContent: "center" }} onClick={save}>Save</button>
+              <button style={{ ...S.btn, ...S.btnOutline, flex: 1, justifyContent: "center" }} onClick={onClose}>Cancel</button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -1494,6 +1607,63 @@ function AdminFlags({ flagsApi, questions, questionsApi }) {
   );
 }
 
+// ─── LOGIN CARDS (PRINT / PDF) ─────────────────────────────────────────────
+const CARDS_PER_PAGE = 27; // 3 columns x 9 rows
+
+function LoginCardsPrint({ students, onClose }) {
+  const pages = [];
+  for (let i = 0; i < students.length; i += CARDS_PER_PAGE) pages.push(students.slice(i, i + CARDS_PER_PAGE));
+
+  return (
+    <div id="login-cards-print" style={{ position: "fixed", inset: 0, background: "#fff", zIndex: 500, overflowY: "auto" }}>
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          #login-cards-print, #login-cards-print * { visibility: visible; }
+          #login-cards-print { position: absolute; inset: 0; }
+          .no-print { display: none !important; }
+          .print-page { page-break-after: always; height: 277mm; }
+          .print-page:last-child { page-break-after: auto; }
+        }
+        @page { size: A4 portrait; margin: 10mm; }
+      `}</style>
+
+      <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "1rem 1.5rem", borderBottom: "1px solid #e5e3dc", position: "sticky", top: 0, background: "#fff", zIndex: 1 }}>
+        <div>
+          <h2 style={{ margin: "0 0 2px", fontSize: 18 }}>Print Login Cards</h2>
+          <p style={{ margin: 0, fontSize: 13, color: "#777" }}>{students.length} card{students.length === 1 ? "" : "s"} · {pages.length} page{pages.length === 1 ? "" : "s"} · 3 × 9 per page</p>
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button style={{ ...S.btn, ...S.btnPrimary }} onClick={() => window.print()}>🖨️ Print / Save as PDF</button>
+          <button style={{ ...S.btn, ...S.btnOutline }} onClick={onClose}>Close</button>
+        </div>
+      </div>
+
+      <div style={{ padding: "1.5rem" }}>
+        {pages.map((pageStudents, pi) => (
+          <div key={pi} className="print-page" style={{
+            display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gridTemplateRows: "repeat(9, 1fr)",
+            gap: 8, maxWidth: 900, margin: "0 auto 2rem", minHeight: 600
+          }}>
+            {pageStudents.map(s => (
+              <div key={s.code} style={{
+                border: "1.5px dashed #ccc", borderRadius: 8, padding: "8px 10px",
+                display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+                textAlign: "center", gap: 3, minHeight: 60
+              }}>
+                <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1, color: "#999", textTransform: "uppercase" }}>{SCHOOL_NAME}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1a1a", lineHeight: 1.2 }}>{s.name}</div>
+                <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 0.5, color: "#aaa", marginTop: 2 }}>LOGIN CODE</div>
+                <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: 1, fontFamily: "monospace", color: "#1D9E75" }}>{s.code}</div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function AdminStudents({ users, usersApi }) {
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ code: "", name: "", className: "", year: "" });
@@ -1501,6 +1671,7 @@ function AdminStudents({ users, usersApi }) {
   const [bulkText, setBulkText] = useState("");
   const [bulkErr, setBulkErr] = useState("");
   const [selected, setSelected] = useState([]);
+  const [printCards, setPrintCards] = useState(null); // array of {code, name} or null
 
   const codes = Object.keys(users).sort();
 
@@ -1533,6 +1704,14 @@ function AdminStudents({ users, usersApi }) {
       <div style={{ display: "flex", gap: 10, marginBottom: "1.25rem", flexWrap: "wrap" }}>
         <button style={{ ...S.btn, ...S.btnPrimary }} onClick={() => setAddOpen(true)}>+ Add Student</button>
         <button style={{ ...S.btn, ...S.btnOutline }} onClick={() => setBulkOpen(true)}>Bulk Import</button>
+        <button style={{ ...S.btn, ...S.btnOutline }}
+          onClick={() => {
+            const targetCodes = selected.length ? selected : codes;
+            setPrintCards(targetCodes.map(c => ({ code: c, name: users[c].name })));
+          }}
+          disabled={codes.length === 0}>
+          🖨️ Print Login Cards{selected.length > 0 ? ` (${selected.length})` : ""}
+        </button>
         {selected.length > 0 && (
           <button style={{ ...S.btn, ...S.btnDanger }} onClick={() => { if (confirm(`Remove ${selected.length} student(s)?`)) { usersApi.removeUsersBulk(selected); setSelected([]); } }}>
             Remove Selected ({selected.length})
@@ -1601,6 +1780,8 @@ function AdminStudents({ users, usersApi }) {
           </div>
         </div>
       )}
+
+      {printCards && <LoginCardsPrint students={printCards} onClose={() => setPrintCards(null)} />}
     </div>
   );
 }
