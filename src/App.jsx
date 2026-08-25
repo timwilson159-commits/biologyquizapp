@@ -264,6 +264,16 @@ const GLOBAL_CSS = `
      inside one can force the whole page wider than the viewport. */
   .bqc-progress-hero > * { min-width: 0; }
 
+  /* Module cards: all 4 in a single row on desktop -- narrower + taller
+     rather than wrapping to two rows. */
+  .bqc-module-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  @media (max-width: 780px) {
+    .bqc-module-grid { grid-template-columns: repeat(2, 1fr); gap: 1.1rem; }
+  }
+  @media (max-width: 460px) {
+    .bqc-module-grid { grid-template-columns: 1fr; }
+  }
+
   @media (max-width: 860px) {
     .bqc-progress-hero { grid-template-columns: 1fr !important; }
   }
@@ -737,6 +747,45 @@ function useAllAttempts() {
   return { attempts, loading, reload };
 }
 
+// Class-scoped leaderboard: ranked by total questions ever answered correctly
+// (no penalty for wrong answers -- purely a "how much have you got right"
+// count, so more practice always helps rather than risking your rank).
+function useLeaderboard(className) {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const reload = async () => {
+    if (!className) { setRows([]); setLoading(false); return; }
+    setLoading(true);
+    const { data: classmates, error: uErr } = await supabase.from("users").select("code,name").eq("class_name", className);
+    if (uErr || !classmates || !classmates.length) { setRows([]); setLoading(false); return; }
+    const codes = classmates.map(u => u.code);
+    const { data: attempts, error: aErr } = await supabase.from("attempts").select("user_code,correct").in("user_code", codes);
+    if (aErr) { setRows([]); setLoading(false); return; }
+
+    const totals = {};
+    (attempts || []).forEach(a => { totals[a.user_code] = (totals[a.user_code] || 0) + (a.correct || 0); });
+
+    const ranked = classmates
+      .map(u => ({ code: u.code, name: u.name, correct: totals[u.code] || 0 }))
+      .sort((a, b) => b.correct - a.correct || a.name.localeCompare(b.name));
+
+    // Competition ranking (1, 2, 2, 4 ...) so ties share a place.
+    let rank = 0, lastScore = null;
+    ranked.forEach((r, i) => {
+      if (r.correct !== lastScore) { rank = i + 1; lastScore = r.correct; }
+      r.rank = rank;
+    });
+
+    setRows(ranked);
+    setLoading(false);
+  };
+
+  useEffect(() => { reload(); }, [className]);
+
+  return { rows, loading, reload };
+}
+
 async function submitAttempt({ userCode, scopeType, scopeId, questionSnapshot, answers, correct, total }) {
   const { error } = await supabase.from("attempts").insert({
     user_code: userCode, scope_type: scopeType, scope_id: scopeId,
@@ -1119,7 +1168,7 @@ function LoginPage({ users, onLogin, onAdmin }) {
     const trimmed = code.trim().toUpperCase();
     if (!trimmed) { setErr("Please enter your login code."); return; }
     if (users[trimmed]) {
-      onLogin({ code: trimmed, name: users[trimmed].name });
+      onLogin({ code: trimmed, name: users[trimmed].name, className: users[trimmed].className || "" });
     } else {
       setErr("Login code not recognised. Please check with your teacher.");
     }
@@ -1579,6 +1628,136 @@ function ModulePage({ moduleDef, questions, user, onBack, onLaunch }) {
   );
 }
 
+// ─── CLASS LEADERBOARD ────────────────────────────────────────────────────────
+function initials(name) {
+  return (name || "?").trim().split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+}
+
+const MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
+const PODIUM_STAND = {
+  1: "linear-gradient(160deg, #FFE8A3, #F5A524)",
+  2: "linear-gradient(160deg, #EDF0F5, #B8C0CC)",
+  3: "linear-gradient(160deg, #F3C9A0, #C97B3D)",
+};
+const PODIUM_STAND_HEIGHT = { 1: 86, 2: 60, 3: 46 };
+
+function PodiumSpot({ entry, place, delay }) {
+  const on = useMounted(delay);
+  const shown = useCountUp(entry ? entry.correct : 0, 900);
+  const empty = !entry;
+  return (
+    <div className="bqc-rise" style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: "1 1 0", minWidth: 0, animationDelay: `${delay}ms` }}>
+      <div style={{ fontSize: place === 1 ? 28 : 22, marginBottom: 4, opacity: empty ? 0.35 : 1, animation: (place === 1 && !empty) ? "bqcFloat 3s ease-in-out infinite" : "none" }}>
+        {MEDAL[place]}
+      </div>
+      <div style={{
+        width: place === 1 ? 56 : 46, height: place === 1 ? 56 : 46, borderRadius: "50%",
+        background: empty ? C.lineSoft : `linear-gradient(135deg, ${C.brand2}, ${C.brand})`,
+        color: empty ? C.faint : "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+        fontWeight: 800, fontSize: place === 1 ? 17 : 14, boxShadow: empty ? "none" : SHADOW.md,
+        border: "3px solid #fff", marginBottom: 8, flexShrink: 0,
+      }}>
+        {empty ? "—" : initials(entry.name)}
+      </div>
+      <div style={{
+        fontSize: 12, fontWeight: 800, color: empty ? C.faint : C.ink, textAlign: "center",
+        maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", padding: "0 2px",
+      }}>
+        {empty ? "Open spot" : entry.name.split(/\s+/)[0]}
+      </div>
+      <div style={{ fontSize: place === 1 ? 19 : 15, fontWeight: 800, color: empty ? C.faint : gradientColor(100).solid, marginTop: 2, lineHeight: 1.2 }}>
+        {empty ? "–" : Math.round(shown)}
+      </div>
+      <div style={{ fontSize: 9, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 9 }}>
+        {empty ? "unclaimed" : "correct"}
+      </div>
+      <div style={{
+        width: "100%", height: on ? PODIUM_STAND_HEIGHT[place] : 0, borderRadius: "10px 10px 0 0",
+        background: empty ? C.lineSoft : PODIUM_STAND[place], transition: "height .85s cubic-bezier(.22,1,.36,1)",
+        display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 6, boxSizing: "border-box",
+      }}>
+        <span style={{ fontWeight: 800, fontSize: place === 1 ? 20 : 16, color: "rgba(255,255,255,.8)" }}>{place}</span>
+      </div>
+    </div>
+  );
+}
+
+function ClassLeaderboard({ user }) {
+  const { rows, loading } = useLeaderboard(user.className);
+
+  if (!user.className) return null;
+
+  if (loading) {
+    return (
+      <div className="bqc-rise" style={{ ...S.card, marginBottom: "1.75rem", padding: "2rem", textAlign: "center", color: C.muted, fontWeight: 600, fontSize: 13.5 }}>
+        🏆 Loading the leaderboard…
+      </div>
+    );
+  }
+  if (!rows.length) return null;
+
+  const me = rows.find(r => r.code === user.code);
+  const podiumEntry = (r) => (r && r.correct > 0 ? r : null);
+  const anyActivity = rows[0].correct > 0;
+
+  return (
+    <div className="bqc-rise" style={{
+      ...S.card, marginBottom: "1.75rem", animationDelay: "110ms", position: "relative", overflow: "hidden",
+      background: `linear-gradient(165deg, #fff 0%, ${C.canvas} 100%)`, borderColor: "rgba(245,165,36,.3)",
+    }}>
+      <div aria-hidden style={{ position: "absolute", top: -44, right: -34, fontSize: 140, opacity: 0.05, lineHeight: 1 }}>🏆</div>
+      <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap", marginBottom: anyActivity ? 20 : 8 }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <span style={{ fontSize: 19 }}>🏆</span>
+            <h2 style={S.h2}>Class Leaderboard</h2>
+          </div>
+          <p style={{ ...S.sub, fontSize: 13, maxWidth: 460 }}>
+            Ranked by total questions answered correctly in <strong style={{ color: C.ink }}>{user.className}</strong> — wrong guesses never cost you, so every attempt only helps.
+          </p>
+        </div>
+        {me && me.correct > 0 && (
+          <span style={{ ...S.badge, background: me.rank <= 3 ? C.goodBg : C.lineSoft, color: me.rank <= 3 ? C.good : C.body, fontSize: 12.5, padding: "7px 13px", flexShrink: 0 }}>
+            {me.rank <= 3 ? "🎉 " : ""}You're #{me.rank} of {rows.length}
+          </span>
+        )}
+      </div>
+
+      {anyActivity ? (
+        <div style={{ position: "relative", display: "flex", alignItems: "flex-end", gap: 10, justifyContent: "center", maxWidth: 420, margin: "0 auto" }}>
+          <PodiumSpot entry={podiumEntry(rows[1])} place={2} delay={140} />
+          <PodiumSpot entry={podiumEntry(rows[0])} place={1} delay={80} />
+          <PodiumSpot entry={podiumEntry(rows[2])} place={3} delay={200} />
+        </div>
+      ) : (
+        <div style={{ position: "relative", textAlign: "center", padding: "1.25rem 1rem 0.5rem" }}>
+          <div style={{ fontSize: 34, marginBottom: 8, animation: "bqcFloat 3s ease-in-out infinite" }}>🌱</div>
+          <p style={{ margin: 0, fontSize: 13.5, color: C.body, fontWeight: 600 }}>No one in {user.className} has answered a question yet — be the first on the board!</p>
+        </div>
+      )}
+
+      {me && me.correct > 0 && me.rank > 3 && (
+        <div className="bqc-rise" style={{ position: "relative", marginTop: 20, padding: "12px 16px", borderRadius: 13, background: C.canvas, border: `1.5px dashed ${C.line}`, display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
+            background: `linear-gradient(135deg, ${C.brand2}, ${C.brand})`, color: "#fff",
+            display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 12.5,
+          }}>{initials(me.name)}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>You're ranked #{me.rank} of {rows.length}</div>
+            <div style={{ fontSize: 12, color: C.muted, fontWeight: 600, marginTop: 1 }}>{me.correct} correct so far — keep practising to climb the board!</div>
+          </div>
+        </div>
+      )}
+      {me && me.correct === 0 && (
+        <div className="bqc-rise" style={{ position: "relative", marginTop: 20, padding: "12px 16px", borderRadius: 13, background: C.canvas, border: `1.5px dashed ${C.line}`, textAlign: "center" }}>
+          <p style={{ margin: 0, fontSize: 12.5, color: C.muted, fontWeight: 600 }}>Answer a few questions to join the board yourself!</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
 function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch }) {
   const [yearPicker, setYearPicker] = useState(false);
@@ -1637,10 +1816,12 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
         <button style={{ ...S.btn, ...S.btnPrimary, ...S.btnLg }} onClick={() => setYearPicker(true)}>Start mixed quiz →</button>
       </div>
 
+      <ClassLeaderboard user={user} />
+
       <h2 style={{ ...S.h2, marginBottom: 4 }}>Modules</h2>
       <p style={{ ...S.sub, fontSize: 13.5, marginBottom: "1.1rem" }}>Practise a whole module, or drill a single inquiry question inside it.</p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(258px, 1fr))", gap: "1.25rem" }}>
+      <div className="bqc-module-grid">
         {MODULE_DEFS.map((m, i) => {
           const moduleQuestions = questions.filter(q => q.module_id === m.id);
           return (
@@ -1648,23 +1829,23 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
               style={{ ...S.card, padding: 0, cursor: "pointer", overflow: "hidden", animationDelay: `${140 + i * 70}ms`, display: "flex", flexDirection: "column" }}
               onClick={() => onSelectModule(m)}>
               <div style={{
-                position: "relative", padding: "1.25rem 1.35rem 1.1rem",
+                position: "relative", padding: "1.5rem 1.1rem 1.1rem",
                 background: `linear-gradient(135deg, ${m.color} 0%, ${m.color2} 130%)`, overflow: "hidden"
               }}>
-                <div aria-hidden style={{ position: "absolute", top: -34, right: -22, fontSize: 96, opacity: 0.19, lineHeight: 1 }}>{m.icon}</div>
+                <div aria-hidden style={{ position: "absolute", top: -30, right: -20, fontSize: 78, opacity: 0.19, lineHeight: 1 }}>{m.icon}</div>
                 <div style={{ position: "relative" }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.11em", textTransform: "uppercase", color: "rgba(255,255,255,.8)", marginBottom: 5 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: "0.11em", textTransform: "uppercase", color: "rgba(255,255,255,.8)", marginBottom: 6 }}>
                     Module {m.id.split("-")[1]}
                   </div>
-                  <h3 style={{ margin: 0, fontSize: 17.5, fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.25 }}>{m.title}</h3>
+                  <h3 style={{ margin: 0, fontSize: 16.5, fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.3 }}>{m.title}</h3>
                 </div>
               </div>
-              <div style={{ padding: "1.1rem 1.35rem 1.3rem", display: "flex", flexDirection: "column", flex: 1 }}>
-                <p style={{ margin: "0 0 15px", fontSize: 13.5, color: C.body, lineHeight: 1.6, fontWeight: 500, flex: 1 }}>{m.description}</p>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+              <div style={{ padding: "1.1rem 1.1rem 1.25rem", display: "flex", flexDirection: "column", flex: 1 }}>
+                <p style={{ margin: "0 0 16px", fontSize: 13, color: C.body, lineHeight: 1.6, fontWeight: 500, flex: 1 }}>{m.description}</p>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    <span style={{ ...S.badge, background: `${m.color}14`, color: m.color }}>{moduleQuestions.length} questions</span>
-                    <span style={{ ...S.badge, background: C.lineSoft, color: C.muted }}>{m.inquiries.length} areas</span>
+                    <span style={{ ...S.badge, background: `${m.color}14`, color: m.color, fontSize: 10.5, padding: "3px 8px" }}>{moduleQuestions.length} Qs</span>
+                    <span style={{ ...S.badge, background: C.lineSoft, color: C.muted, fontSize: 10.5, padding: "3px 8px" }}>{m.inquiries.length} areas</span>
                   </div>
                   <span style={{ color: m.color, fontWeight: 800, fontSize: 17 }}>→</span>
                 </div>
