@@ -24,6 +24,7 @@ const COUNT_LIMITS = {
 const MODULE_DEFS = [
   {
     id: "module-1",
+    year: 11,
     icon: "🔬",
     title: "Cells as the Basis of Life",
     color: "#059669",
@@ -36,6 +37,7 @@ const MODULE_DEFS = [
   },
   {
     id: "module-2",
+    year: 11,
     icon: "🫀",
     title: "Organisation of Living Things",
     color: "#EA580C",
@@ -49,6 +51,7 @@ const MODULE_DEFS = [
   },
   {
     id: "module-3",
+    year: 11,
     icon: "🌿",
     title: "Biological Diversity",
     color: "#7C3AED",
@@ -63,6 +66,7 @@ const MODULE_DEFS = [
   },
   {
     id: "module-4",
+    year: 11,
     icon: "🌏",
     title: "Ecosystem Dynamics",
     color: "#0284C7",
@@ -73,8 +77,74 @@ const MODULE_DEFS = [
       { id: "4.2", title: "Past Ecosystems", question: "How do selection pressures within an ecosystem influence evolutionary change?" },
       { id: "4.3", title: "Future Ecosystems", question: "How can human activity impact on an ecosystem?" }
     ]
+  },
+  {
+    id: "module-5",
+    year: 12,
+    icon: "🧬",
+    title: "Heredity",
+    color: "#DB2777",
+    color2: "#F472B6",
+    description: "How reproduction, cell replication and DNA copying pass genetic information from one generation to the next.",
+    inquiries: [
+      { id: "5.1", title: "Reproduction", question: "How does reproduction ensure the continuity of a species?" },
+      { id: "5.2", title: "Cell Replication", question: "How important is it for genetic material to be replicated exactly?" },
+      { id: "5.3", title: "DNA and Polypeptide Synthesis", question: "Why is polypeptide synthesis important?" },
+      { id: "5.4", title: "Genetic Variation", question: "How can the genetic similarities and differences within and between species be compared?" },
+      { id: "5.5", title: "Inheritance Patterns in a Population", question: "Can population genetic patterns be predicted with any accuracy?" }
+    ]
+  },
+  {
+    id: "module-6",
+    year: 12,
+    icon: "🧫",
+    title: "Genetic Change",
+    color: "#0D9488",
+    color2: "#2DD4BF",
+    description: "How mutation, biotechnology and genetic technologies reshape populations and biodiversity.",
+    inquiries: [
+      { id: "6.1", title: "Mutation", question: "How does mutation introduce new alleles into a population?" },
+      { id: "6.2", title: "Biotechnology", question: "How do genetic techniques affect Earth's biodiversity?" },
+      { id: "6.3", title: "Genetic Technologies", question: "Does artificial manipulation of DNA have the potential to change populations forever?" }
+    ]
+  },
+  {
+    id: "module-7",
+    year: 12,
+    icon: "🦠",
+    title: "Infectious Disease",
+    color: "#DC2626",
+    color2: "#F87171",
+    description: "How pathogens cause and spread disease, and how immunity and treatments fight back.",
+    inquiries: [
+      { id: "7.1", title: "Causes of Infectious Disease", question: "How are diseases transmitted?" },
+      { id: "7.2", title: "Responses to Pathogens", question: "How does a plant or animal respond to infection?" },
+      { id: "7.3", title: "Immunity", question: "How does the human immune system respond to exposure to a pathogen?" },
+      { id: "7.4", title: "Prevention, Treatment and Control", question: "How can the spread of infectious diseases be controlled?" }
+    ]
+  },
+  {
+    id: "module-8",
+    year: 12,
+    icon: "🩺",
+    title: "Non-infectious Disease and Disorders",
+    color: "#D97706",
+    color2: "#FBBF24",
+    description: "How the body maintains balance, what goes wrong in non-infectious disease, and how technology helps.",
+    inquiries: [
+      { id: "8.1", title: "Homeostasis", question: "How is an organism's internal environment maintained in response to a changing external environment?" },
+      { id: "8.2", title: "Causes and Effects", question: "Do non-infectious diseases cause more deaths than infectious diseases?" },
+      { id: "8.3", title: "Epidemiology", question: "Why are epidemiological studies used?" },
+      { id: "8.4", title: "Prevention", question: "How can non-infectious diseases be prevented?" },
+      { id: "8.5", title: "Technologies and Disorders", question: "How can technologies be used to assist people who experience disorders?" }
+    ]
   }
 ];
+
+// Normalises whatever is stored on a student's record to "11" or "12",
+// defaulting to 11 for blank/legacy rows that predate the Year 12 rollout.
+function normalizedYear(year) { return String(year).trim() === "12" ? 12 : 11; }
+function modulesForYear(year) { return MODULE_DEFS.filter(m => m.year === normalizedYear(year)); }
 
 function moduleLabel(m) { return `Module ${m.id.split("-")[1]}: ${m.title}`; }
 
@@ -423,7 +493,12 @@ function useCountUp(target, duration = 900) {
 function poolForScope(questions, scopeType, scopeId) {
   if (scopeType === "inquiry") return questions.filter(q => q.inquiry_id === scopeId);
   if (scopeType === "module") return questions.filter(q => q.module_id === scopeId);
-  if (scopeType === "year") return questions;
+  if (scopeType === "year") {
+    // scopeId carries the student's course year ("11"/"12") so a mixed quiz
+    // never draws from a year the student hasn't been taught.
+    const ids = new Set(modulesForYear(scopeId).map(m => m.id));
+    return questions.filter(q => ids.has(q.module_id));
+  }
   return [];
 }
 
@@ -440,7 +515,7 @@ const MIN_SAMPLE = 5; // questions needed in an area before we call it a strengt
 
 function emptyBucket() { return { attempted: 0, correct: 0, sessions: 0, lastAt: null, timeline: [] }; }
 
-function computeAnalytics(attempts) {
+function computeAnalytics(attempts, modules = MODULE_DEFS) {
   const chronological = [...(attempts || [])].sort((a, b) => new Date(a.submitted_at) - new Date(b.submitted_at));
 
   const byInquiry = {};
@@ -527,9 +602,12 @@ function computeAnalytics(attempts) {
     }
   });
 
-  // Every syllabus area, including ones never practised, so gaps are visible.
+  // Every syllabus area in the student's own course year, including ones never
+  // practised (so gaps are visible) -- never the other year's, so a Year 11
+  // student isn't shown "8 areas not started" for Year 12 content they haven't
+  // been taught yet.
   const areas = [];
-  for (const m of MODULE_DEFS) {
+  for (const m of modules) {
     for (const inq of m.inquiries) {
       const b = byInquiry[inq.id] || { ...emptyBucket(), accuracy: null, delta: null };
       areas.push({
@@ -576,7 +654,7 @@ function computeStreak(dayKeys) {
 }
 
 function scopeLabelFor(scopeType, scopeId) {
-  if (scopeType === "year") return "Whole Year";
+  if (scopeType === "year") return (scopeId === "11" || scopeId === "12") ? `Year ${scopeId} Mix` : "Whole Year Mix";
   if (scopeType === "module") { const m = findModule(scopeId); return m ? moduleLabel(m) : scopeId; }
   const inq = findInquiry(scopeId);
   return inq ? `${inq.id} ${inq.title}` : scopeId;
@@ -1168,7 +1246,7 @@ function LoginPage({ users, onLogin, onAdmin }) {
     const trimmed = code.trim().toUpperCase();
     if (!trimmed) { setErr("Please enter your login code."); return; }
     if (users[trimmed]) {
-      onLogin({ code: trimmed, name: users[trimmed].name, className: users[trimmed].className || "" });
+      onLogin({ code: trimmed, name: users[trimmed].name, className: users[trimmed].className || "", year: users[trimmed].year || "" });
     } else {
       setErr("Login code not recognised. Please check with your teacher.");
     }
@@ -1761,7 +1839,10 @@ function ClassLeaderboard({ user }) {
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
 function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch }) {
   const [yearPicker, setYearPicker] = useState(false);
-  const totalQuestions = questions.length;
+  const courseYear = normalizedYear(user.year);
+  const myModules = useMemo(() => modulesForYear(courseYear), [courseYear]);
+  const myModuleIds = useMemo(() => new Set(myModules.map(m => m.id)), [myModules]);
+  const totalQuestions = questions.filter(q => myModuleIds.has(q.module_id)).length;
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -1785,7 +1866,7 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
             </p>
             <h1 style={{ ...S.h1, color: "#fff", fontSize: 34 }}>Ready for a bit of revision?</h1>
             <p style={{ margin: "10px 0 0", color: "rgba(255,255,255,.72)", fontSize: 14.5, fontWeight: 500, maxWidth: 430, lineHeight: 1.6 }}>
-              Pick a module below, or throw yourself at a mix from the whole year. Instant feedback on every question.
+              Pick a module below, or throw yourself at a mix from your whole Year {courseYear} course. Instant feedback on every question.
             </p>
           </div>
           <button style={{ ...S.btn, ...S.btnLg, background: "rgba(255,255,255,.14)", color: "#fff", borderColor: "rgba(255,255,255,.28)", backdropFilter: "blur(6px)" }}
@@ -1807,20 +1888,20 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
             background: `linear-gradient(135deg, ${C.brand2}, ${C.brandDeep})`, boxShadow: "0 4px 14px rgba(4,107,80,.3)", flexShrink: 0
           }}>🎲</div>
           <div>
-            <h3 style={S.h3}>Whole Year Mix</h3>
+            <h3 style={S.h3}>Year {courseYear} Mix</h3>
             <p style={{ margin: "3px 0 0", fontSize: 13.5, color: C.muted, fontWeight: 600 }}>
-              {totalQuestions} questions across every module
+              {totalQuestions} questions across all {myModules.length} Year {courseYear} modules
             </p>
           </div>
         </div>
         <button style={{ ...S.btn, ...S.btnPrimary, ...S.btnLg }} onClick={() => setYearPicker(true)}>Start mixed quiz →</button>
       </div>
 
-      <h2 style={{ ...S.h2, marginBottom: 4 }}>Modules</h2>
+      <h2 style={{ ...S.h2, marginBottom: 4 }}>Year {courseYear} Modules</h2>
       <p style={{ ...S.sub, fontSize: 13.5, marginBottom: "1.1rem" }}>Practise a whole module, or drill a single inquiry question inside it.</p>
 
       <div className="bqc-module-grid">
-        {MODULE_DEFS.map((m, i) => {
+        {myModules.map((m, i) => {
           const moduleQuestions = questions.filter(q => q.module_id === m.id);
           return (
             <div key={m.id} className="bqc-rise bqc-lift"
@@ -1857,10 +1938,10 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
 
       {yearPicker && (
         <CountPickerModal
-          title="Whole Year Mix" subtitle="A random mix from every module" scopeType="year"
+          title={`Year ${courseYear} Mix`} subtitle={`A random mix from every Year ${courseYear} module`} scopeType="year"
           poolSize={totalQuestions}
           onCancel={() => setYearPicker(false)}
-          onStart={count => { onLaunch({ scopeType: "year", scopeId: "year", scopeLabel: "Whole Year Mix", color: C.brand, count }); setYearPicker(false); }}
+          onStart={count => { onLaunch({ scopeType: "year", scopeId: String(courseYear), scopeLabel: `Year ${courseYear} Mix`, color: C.brand, count }); setYearPicker(false); }}
         />
       )}
     </div>
@@ -2158,7 +2239,8 @@ function ProgressPage({ user, onBack }) {
   const [sortMode, setSortMode] = useState("syllabus");
   const [openArea, setOpenArea] = useState(null);
 
-  const a = useMemo(() => computeAnalytics(attempts), [attempts]);
+  const myModules = useMemo(() => modulesForYear(user.year), [user.year]);
+  const a = useMemo(() => computeAnalytics(attempts, myModules), [attempts, myModules]);
 
   if (loading) {
     return (
@@ -2240,7 +2322,7 @@ function ProgressPage({ user, onBack }) {
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: "1.25rem", alignItems: "center" }}>
         <span style={{ ...S.eyebrow, marginRight: 2 }}>Filter</span>
         <button style={chip(moduleFilter === "all", C.ink)} onClick={() => setModuleFilter("all")}>All modules</button>
-        {MODULE_DEFS.map(m => (
+        {myModules.map(m => (
           <button key={m.id} style={chip(moduleFilter === m.id, m.color)} onClick={() => setModuleFilter(m.id)}>
             {m.icon} Module {m.id.split("-")[1]}
           </button>
@@ -2276,7 +2358,7 @@ function ProgressPage({ user, onBack }) {
           <p style={{ ...S.sub, fontSize: 13.5, marginTop: 4, marginBottom: 6 }}>The further out a point sits, the stronger that area. Tap a number to inspect it.</p>
           <SyllabusRadar areas={a.areas} selected={openArea} onPick={(id) => { setOpenArea(id); if (id) setSortMode("syllabus"); }} />
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 10 }}>
-            {MODULE_DEFS.map(m => (
+            {myModules.map(m => (
               <span key={m.id} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11.5, color: C.muted, fontWeight: 700 }}>
                 <span style={{ width: 9, height: 9, borderRadius: "50%", background: m.color }} /> M{m.id.split("-")[1]}
               </span>
