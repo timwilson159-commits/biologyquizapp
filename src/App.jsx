@@ -1277,7 +1277,7 @@ function LoginPage({ users, onLogin, onAdmin }) {
           }}>🧬</div>
           <div style={{ fontSize: 11, fontWeight: 800, color: "rgba(125,232,192,.85)", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 10 }}>{SCHOOL_NAME}</div>
           <h1 style={{ margin: "0 0 8px", fontSize: 37, fontWeight: 800, color: "#fff", letterSpacing: "-0.035em", lineHeight: 1.1 }}>Quiz Centre</h1>
-          <p style={{ margin: 0, color: "rgba(255,255,255,.5)", fontSize: 15, fontWeight: 500 }}>Year 11 Biology revision, any time</p>
+          <p style={{ margin: 0, color: "rgba(255,255,255,.5)", fontSize: 15, fontWeight: 500 }}>Biology revision, any time</p>
         </div>
 
         <div style={{
@@ -3138,7 +3138,7 @@ export default function App() {
           }}>🧬</div>
           <div>
             <div style={S.navBrand}>{SCHOOL_NAME}</div>
-            <div style={S.navSub}>Year 11 Biology</div>
+            <div style={S.navSub}>Year {normalizedYear(user.year)} Biology</div>
           </div>
         </div>
         <div style={{ flex: 1 }} />
