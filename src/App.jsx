@@ -1702,7 +1702,7 @@ function ClassLeaderboard({ user }) {
 
   return (
     <div className="bqc-rise" style={{
-      ...S.card, marginBottom: "1.75rem", animationDelay: "110ms", position: "relative", overflow: "hidden",
+      ...S.card, marginBottom: "1.75rem", animationDelay: "420ms", position: "relative", overflow: "hidden",
       background: `linear-gradient(165deg, #fff 0%, ${C.canvas} 100%)`, borderColor: "rgba(245,165,36,.3)",
     }}>
       <div aria-hidden style={{ position: "absolute", top: -44, right: -34, fontSize: 140, opacity: 0.05, lineHeight: 1 }}>🏆</div>
@@ -1816,8 +1816,6 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
         <button style={{ ...S.btn, ...S.btnPrimary, ...S.btnLg }} onClick={() => setYearPicker(true)}>Start mixed quiz →</button>
       </div>
 
-      <ClassLeaderboard user={user} />
-
       <h2 style={{ ...S.h2, marginBottom: 4 }}>Modules</h2>
       <p style={{ ...S.sub, fontSize: 13.5, marginBottom: "1.1rem" }}>Practise a whole module, or drill a single inquiry question inside it.</p>
 
@@ -1854,6 +1852,8 @@ function HomePage({ user, questions, onSelectModule, onViewProgress, onLaunch })
           );
         })}
       </div>
+
+      <ClassLeaderboard user={user} />
 
       {yearPicker && (
         <CountPickerModal
