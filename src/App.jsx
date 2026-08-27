@@ -691,7 +691,24 @@ function useQuestions() {
 
   const reload = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("questions").select("*").order("created_at", { ascending: true });
+    // Supabase/PostgREST caps a single response at 1000 rows by default. The
+    // bank is well past that now, so page through in fixed-size chunks until
+    // a page comes back short (the reliable signal we've reached the end) --
+    // don't rely on knowing the exact PostgREST limit here.
+    const PAGE_SIZE = 1000;
+    let all = [];
+    let error = null;
+    for (let from = 0; ; from += PAGE_SIZE) {
+      const { data, error: pageError } = await supabase
+        .from("questions")
+        .select("*")
+        .order("created_at", { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+      if (pageError) { error = pageError; break; }
+      all = all.concat(data || []);
+      if (!data || data.length < PAGE_SIZE) break;
+    }
+    const data = all;
     if (error) { console.error("Load questions error:", error); setLoading(false); return; }
     setQuestions(data || []);
     setLoading(false);
