@@ -71,14 +71,20 @@ const INQUIRIES = [
 ]
 
 const FORMAT_NOTES = `
-Platform question types and their JSON shape:
+Platform question types and their JSON shape (fill-blank does NOT exist -- never produce it):
 - multiple-choice: { type, prompt, image: null, options: [4 strings], answer: <one of options, exact string match> }
 - true-false: { type, prompt, image: null, options: ["True","False"], answer: "True"|"False" }
-- fill-blank: { type, prompt (use ___ to mark the blank), image: null, answer: "<short string>", hint: "<optional>" }
-- word-bank: { type, prompt (use ___ to mark the blank), image: null, bank: [5 strings: 1 correct + 4 distractors], answer: "<the correct string, must match one bank entry exactly>" }
+- word-bank: { type, prompt, image: null, bank: [3-8 strings: the correct word(s) + distractors], answer }. Mark each blank with "___", in order -- 1 to 3 blanks per question. 1 blank: answer is a single string matching one bank entry exactly. 2-3 blanks: answer is an array of strings in the same order as the blanks, each matching one bank entry exactly; the bank holds every blank's correct word plus distractors, up to 8 entries total.
 - drag-drop: { type, prompt, image: null, pairs: [{item,match}, ...] (3-6 pairs), answer: {"<item>":"<match>", ...} }
 - ordering: { type, prompt, image: null, items: [4-6 strings in correct order], answer: [same strings, in the correct order] }
 Every question's "image" field must be null -- this batch is text-only by design.
+`
+
+const FAIRNESS_RULES = `
+FAIRNESS & FORMAT RULES (apply strictly -- these caused real problems in an earlier batch):
+- fill-blank (typed free-text answer) is BANNED -- it is not a supported type on this platform. Never produce it. Every question must be multiple-choice, true-false, word-bank, drag-drop, or ordering.
+- Never use word-bank for a numeric/calculated answer, or any answer whose exact wording, units, or format could reasonably vary (e.g. a student typing "high" when the stored answer is "increased" would be marked wrong even though they're right). Convert these to multiple-choice instead, spelling the value/wording out in full inside each option, with plausible wrong options as distractors. Every word-bank blank should be a single, unambiguous term or short phrase with no reasonable alternative phrasing. A multi-blank (2-3) word-bank suits content that naturally names two or three distinct terms in one sentence -- don't force it otherwise.
+- If a question can't be made fair and unambiguous within the 5 supported types even after simplifying, don't force it through on a guess -- flag it for human review instead (see verdict options below) rather than shipping something a student could reasonably get wrong purely from unclear wording rather than not knowing the biology.
 `
 
 const DRAFT_SCHEMA = {
@@ -89,7 +95,7 @@ const DRAFT_SCHEMA = {
       items: {
         type: 'object',
         properties: {
-          type: { type: 'string', enum: ['multiple-choice', 'true-false', 'fill-blank', 'word-bank', 'drag-drop', 'ordering'] },
+          type: { type: 'string', enum: ['multiple-choice', 'true-false', 'word-bank', 'drag-drop', 'ordering'] },
           prompt: { type: 'string' },
           options: {},
           bank: {},
@@ -114,7 +120,7 @@ const VERIFY_SCHEMA = {
         type: 'object',
         properties: {
           index: { type: 'number', description: 'position of this question in the drafted array, 0-based' },
-          verdict: { type: 'string', enum: ['confirmed', 'fixed', 'rejected'] },
+          verdict: { type: 'string', enum: ['confirmed', 'fixed', 'rejected', 'needs_review'] },
           question: {},
           issue: {},
         },
@@ -139,12 +145,12 @@ SYLLABUS CONTENT FOR THIS INQUIRY QUESTION (the actual NESA outcomes/skills to d
 ${inq.syllabus}
 ${existingBlock}
 ${FORMAT_NOTES}
-
+${FAIRNESS_RULES}
 TASK: Write between 20 and 30 questions covering this inquiry question's syllabus content. Follow these rules exactly:
 
 1. FOCUS ON CONCEPTS AND SKILLS, not obscure trivia. Every question should test understanding of a concept, process, or skill explicitly named in the syllabus content above -- not a random fact that happens to be true but isn't actually part of what's being taught. Include some questions that require applying a concept (e.g. "which process explains X observation" or a short scenario), not just pure definition recall -- but keep it text-only since there are no images in this batch.
 2. NO TRICKERY. Keep the language fair and direct. Avoid: double negatives, deliberately ambiguous wording, "except" questions unless genuinely the clearest way to test the idea, distractors that are arguably also correct, trick phrasing designed to catch students out on a technicality rather than testing real understanding. A well-prepared student who understands the concept should be able to answer confidently -- the difficulty should come from the biology, not from parsing the question.
-3. VARY THE QUESTION TYPE. Do not make most of these multiple-choice. Aim for roughly this spread across the batch: about a third multiple-choice, and meaningfully use every other type (true-false, fill-blank, word-bank, drag-drop matching, ordering) at least 2-3 times each. Let the content suggest the type -- a sequence of steps (e.g. stages of a process) suits ordering; a set of terms-to-definitions or structures-to-functions suits drag-drop matching; a key term in context suits fill-blank or word-bank; a single true claim to evaluate suits true-false.
+3. VARY THE QUESTION TYPE. Do not make most of these multiple-choice. Aim for roughly this spread across the batch: about a third multiple-choice, and meaningfully use every other type (true-false, word-bank, drag-drop matching, ordering) at least 2-3 times each. Let the content suggest the type -- a sequence of steps (e.g. stages of a process) suits ordering; a set of terms-to-definitions or structures-to-functions suits drag-drop matching; a key term (or, where the content naturally names 2-3 terms in one sentence, up to 3 terms) in context suits word-bank; a single true claim to evaluate suits true-false.
 4. Every answer must be factually correct, unambiguous, and something you are confident about from biology knowledge at NSW Year 11 standard.
 5. Do not include any image -- every question's image field is null.
 6. Avoid duplicating each other within this batch (no two questions testing the exact same fact in slightly different words).
@@ -161,16 +167,17 @@ ${inq.syllabus}
 
 DRAFTED QUESTIONS (0-indexed):
 ${JSON.stringify(draft.questions, null, 2)}
-
+${FAIRNESS_RULES}
 For EACH question, check:
 1. Biological accuracy -- is the marked answer actually correct? Are any distractors arguably also correct (making the question unfair)?
 2. Syllabus fit -- does it genuinely test something in the syllabus content above, not an unrelated fact?
 3. Fairness -- no trick wording, double negatives, or answers that hinge on parsing rather than biology understanding. A well-prepared student should be able to answer confidently.
-4. Structural correctness for its type (multiple-choice/word-bank answer exactly matches one option/bank entry; drag-drop answer keys exactly match pairs' item fields; ordering answer is a permutation of items in the correct order; true-false answer is "True" or "False").
-5. image field is null (it must be -- this is a text-only batch).
-6. Not a near-duplicate of another question in this same batch.
+4. Format ambiguity -- does it use fill-blank (banned, must be rejected/fixed into another type) or a word-bank answer whose wording/format could reasonably vary? If so, either fix it (usually by converting to multiple-choice) or flag it.
+5. Structural correctness for its type (multiple-choice answer exactly matches one option; word-bank answer exactly matches one bank entry for a single blank, or is an array of bank entries in blank order for 2-3 blanks; drag-drop answer keys exactly match pairs' item fields; ordering answer is a permutation of items in the correct order; true-false answer is "True" or "False").
+6. image field is null (it must be -- this is a text-only batch).
+7. Not a near-duplicate of another question in this same batch.
 
-If a question has a small fixable problem, FIX it yourself and return the corrected full question object (with the same "index") and verdict "fixed". If correct as-is, verdict "confirmed". If it can't be fixed simply (wrong answer you're not confident correcting, fundamentally unfair, or a duplicate), verdict "rejected" with a short issue.
+Verdicts: "confirmed" (correct as-is). "fixed" (you corrected a small problem -- return the full corrected question object with the same "index"). "needs_review" (a genuine fairness/format/accuracy concern you can't confidently resolve yourself -- return your best-effort question plus a clear "issue", so a human can decide). "rejected" (wrong answer you're not confident correcting, fundamentally unfair, or a duplicate) -- only for questions not worth surfacing at all.
 
 Return one result per drafted question, matched by its 0-based "index" in the array above.`
 }
@@ -184,25 +191,30 @@ const results = await pipeline(
   (inq) => agent(draftPrompt(inq, existingByInquiry[inq.id]), { label: `draft:${inq.id}`, phase: 'Draft', schema: DRAFT_SCHEMA }),
   (draft, inq) => {
     if (!draft || !draft.questions || draft.questions.length === 0) {
-      return { inquiry_id: inq.id, module_id: inq.module_id, confirmed: [] }
+      return { inquiry_id: inq.id, module_id: inq.module_id, confirmed: [], needsReview: [] }
     }
     return agent(verifyPrompt(inq, draft), { label: `verify:${inq.id}`, phase: 'Verify', schema: VERIFY_SCHEMA })
       .then((verify) => {
         const confirmed = []
+        const needsReview = []
         for (const r of (verify ? verify.results : [])) {
           if (r.verdict === 'rejected') continue
-          const q = r.verdict === 'fixed' && r.question ? r.question : draft.questions[r.index]
-          if (q) confirmed.push({ ...q, inquiry_id: inq.id, module_id: inq.module_id, image: null })
+          const q = (r.verdict === 'fixed' || r.verdict === 'needs_review') && r.question ? r.question : draft.questions[r.index]
+          if (!q) continue
+          const tagged = { ...q, inquiry_id: inq.id, module_id: inq.module_id, image: null }
+          if (r.verdict === 'needs_review') needsReview.push({ ...tagged, review_reason: r.issue || 'flagged for review by verifier' })
+          else confirmed.push(tagged)
         }
-        return { inquiry_id: inq.id, module_id: inq.module_id, confirmed }
+        return { inquiry_id: inq.id, module_id: inq.module_id, confirmed, needsReview }
       })
   }
 )
 
 const allConfirmed = results.filter(Boolean).flatMap((r) => r.confirmed)
+const allNeedsReview = results.filter(Boolean).flatMap((r) => r.needsReview || [])
 const byInquiry = {}
 for (const r of results.filter(Boolean)) byInquiry[r.inquiry_id] = r.confirmed.length
 
-log(`Bank generation complete: ${allConfirmed.length} questions across ${inquiries.length} inquiry questions`)
+log(`Bank generation complete: ${allConfirmed.length} confirmed, ${allNeedsReview.length} need human review, across ${inquiries.length} inquiry questions`)
 
-return { confirmed: allConfirmed, countsByInquiry: byInquiry }
+return { confirmed: allConfirmed, needsReview: allNeedsReview, countsByInquiry: byInquiry }

@@ -1,68 +1,56 @@
-import json, base64, os, html, sys
+import json, html, sys
 
-# Usage: python build_preview.py <examFolder> <questions.json> <out.html> "<Display Title>"
-EXAM_FOLDER = sys.argv[1]
-QUESTIONS_PATH = sys.argv[2]
+# Usage: python build_hsc_preview.py <confirmed.json> <ready_to_insert.json> <out.html>
+# The two input files must be the same length and in the same order (as
+# produced by workflow_hsc_pipeline.js -> upload_hsc_images.cjs) -- zipped by
+# index to combine confirmed.json's human-readable provenance (source_ref,
+# exam_slug, conversion_note) with ready_to_insert.json's final DB-shaped
+# fields (module_id, hosted image URL).
+CONFIRMED_PATH = sys.argv[1]
+ROWS_PATH = sys.argv[2]
 OUT_PATH = sys.argv[3]
-DISPLAY_TITLE = sys.argv[4] if len(sys.argv) > 4 else os.path.basename(EXAM_FOLDER)
 
 MODULE_DEFS = [
-    {"id": "module-1", "title": "Cells as the Basis of Life", "color": "#1D9E75", "inquiries": [
-        {"id": "1.1", "title": "Cell Structure"},
-        {"id": "1.2", "title": "Cell Function"},
+    {"id": "module-5", "title": "Heredity", "color": "#DC2626", "inquiries": [
+        {"id": "5.1", "title": "Reproduction"}, {"id": "5.2", "title": "Cell Replication"},
+        {"id": "5.3", "title": "DNA and Polypeptide Synthesis"}, {"id": "5.4", "title": "Genetic Variation"},
+        {"id": "5.5", "title": "Inheritance Patterns in a Population"},
     ]},
-    {"id": "module-2", "title": "Organisation of Living Things", "color": "#DC2626", "inquiries": [
-        {"id": "2.1", "title": "Organisation of Cells"},
-        {"id": "2.2", "title": "Nutrient and Gas Requirements"},
-        {"id": "2.3", "title": "Transport"},
+    {"id": "module-6", "title": "Genetic Change", "color": "#7C3AED", "inquiries": [
+        {"id": "6.1", "title": "Mutation"}, {"id": "6.2", "title": "Biotechnology"}, {"id": "6.3", "title": "Genetic Technologies"},
     ]},
-    {"id": "module-3", "title": "Biological Diversity", "color": "#0F6E56", "inquiries": [
-        {"id": "3.1", "title": "Effects of the Environment on Organisms"},
-        {"id": "3.2", "title": "Adaptations"},
-        {"id": "3.3", "title": "Theory of Evolution by Natural Selection"},
-        {"id": "3.4", "title": "Evolution - the Evidence"},
+    {"id": "module-7", "title": "Infectious Disease", "color": "#0F6E56", "inquiries": [
+        {"id": "7.1", "title": "Causes of Infectious Disease"}, {"id": "7.2", "title": "Responses to Pathogens"},
+        {"id": "7.3", "title": "Immunity"}, {"id": "7.4", "title": "Prevention, Treatment and Control"},
     ]},
-    {"id": "module-4", "title": "Ecosystem Dynamics", "color": "#7C3AED", "inquiries": [
-        {"id": "4.1", "title": "Population Dynamics"},
-        {"id": "4.2", "title": "Past Ecosystems"},
-        {"id": "4.3", "title": "Future Ecosystems"},
+    {"id": "module-8", "title": "Non-infectious Disease and Disorders", "color": "#1D9E75", "inquiries": [
+        {"id": "8.1", "title": "Homeostasis"}, {"id": "8.2", "title": "Causes and Effects"}, {"id": "8.3", "title": "Epidemiology"},
+        {"id": "8.4", "title": "Prevention"}, {"id": "8.5", "title": "Technologies and Disorders"},
     ]},
 ]
-
-MIME = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".gif": "image/gif"}
-
-def img_data_uri(filename):
-    ext = os.path.splitext(filename)[1].lower()
-    path = os.path.join(EXAM_FOLDER, filename)
-    with open(path, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode("ascii")
-    return f"data:{MIME.get(ext,'application/octet-stream')};base64,{b64}"
 
 def esc(s):
     return html.escape(str(s), quote=True)
 
-with open(QUESTIONS_PATH, encoding="utf-8") as f:
-    questions = json.load(f)
+with open(CONFIRMED_PATH, encoding="utf-8") as f:
+    confirmed = json.load(f)
+with open(ROWS_PATH, encoding="utf-8") as f:
+    rows = json.load(f)
+assert len(confirmed) == len(rows), f"length mismatch: {len(confirmed)} vs {len(rows)}"
 
-for i, q in enumerate(questions):
-    q.setdefault("source_ref", f"#{i+1}")
-
-image_cache = {}
-def get_img(filename):
-    if filename not in image_cache:
-        image_cache[filename] = img_data_uri(filename)
-    return image_cache[filename]
+questions = []
+for c, r in zip(confirmed, rows):
+    q = {**c, **r}  # row fields (module_id, final image URL, normalized answer) win
+    q["exam_label"] = f"HSC {c['exam_slug'].replace('hsc-', '')} Q{c['source_ref']}"
+    questions.append(q)
 
 by_inquiry = {}
 for q in questions:
     by_inquiry.setdefault(q["inquiry_id"], []).append(q)
 
 TYPE_LABELS = {
-    "multiple-choice": "Multiple Choice",
-    "true-false": "True / False",
-    "word-bank": "Word Bank",
-    "drag-drop": "Drag & Drop Matching",
-    "ordering": "Ordering",
+    "multiple-choice": "Multiple Choice", "true-false": "True / False",
+    "word-bank": "Word Bank", "drag-drop": "Drag & Drop Matching", "ordering": "Ordering",
 }
 
 def render_question_body(q):
@@ -70,7 +58,7 @@ def render_question_body(q):
     parts = []
     if t in ("multiple-choice", "true-false"):
         parts.append('<div class="options">')
-        for opt in q.get("options", []):
+        for opt in q.get("options") or []:
             correct = opt == q["answer"]
             cls = "opt correct" if correct else "opt"
             mark = ' <span class="tick">&#10003; correct</span>' if correct else ""
@@ -81,7 +69,7 @@ def render_question_body(q):
         parts.append(f'<p class="prompt-inline">{prompt_html}</p>')
         parts.append('<div class="options">')
         correct_words = q["answer"] if isinstance(q["answer"], list) else [q["answer"]]
-        for w in q.get("bank", []):
+        for w in q.get("bank") or []:
             correct = w in correct_words
             cls = "opt correct" if correct else "opt"
             mark = ' <span class="tick">&#10003; correct</span>' if correct else ""
@@ -89,17 +77,14 @@ def render_question_body(q):
         parts.append('</div>')
     elif t == "drag-drop":
         parts.append('<table class="pairs-table"><thead><tr><th>Item</th><th>Correct match</th></tr></thead><tbody>')
-        for p in q.get("pairs", []):
+        for p in q.get("pairs") or []:
             parts.append(f'<tr><td>{esc(p["item"])}</td><td>{esc(p["match"])}</td></tr>')
         parts.append('</tbody></table>')
     elif t == "ordering":
         parts.append('<ol class="order-list">')
-        for item in q.get("answer", []):
+        for item in q.get("answer") or []:
             parts.append(f'<li>{esc(item)}</li>')
         parts.append('</ol>')
-        shown = q.get("items", [])
-        if shown:
-            parts.append(f'<p class="shuffled-note">Shown to students in shuffled order, e.g.: {esc(", ".join(shown))}</p>')
     return "".join(parts)
 
 card_html = []
@@ -117,18 +102,12 @@ for mod in MODULE_DEFS:
         card_html.append(f'<h3 id="{anchor}" class="inquiry-heading">{esc(inq["id"])} &middot; {esc(inq["title"])} <span class="count-badge">{len(qs)} questions</span></h3>')
         for q in qs:
             total += 1
-            img_filename = q.get("image_filename") or q.get("image")
-            img_html = ""
-            if img_filename:
-                try:
-                    img_html = f'<img class="q-image" src="{get_img(img_filename)}" alt="stimulus image" />'
-                except FileNotFoundError:
-                    img_html = f'<div class="img-missing">Image file not found: {esc(img_filename)}</div>'
+            img_html = f'<img class="q-image" src="{esc(q["image"])}" alt="stimulus image" />' if q.get("image") else ""
             note = q.get("conversion_note", "")
             card_html.append(f'''
 <div class="q-card">
   <div class="q-meta">
-    <span class="badge source">{esc(q["source_ref"])}</span>
+    <span class="badge source">{esc(q["exam_label"])}</span>
     <span class="badge type">{esc(TYPE_LABELS.get(q["type"], q["type"]))}</span>
   </div>
   <p class="q-prompt">{esc(q["prompt"])}</p>
@@ -146,7 +125,7 @@ html_out = f'''<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Girraween 2020 - Question Preview</title>
+<title>HSC Year 12 MCQ Batch - Question Preview</title>
 <style>
   * {{ box-sizing: border-box; }}
   body {{ font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; background: #f5f4f0; color: #1a1a1a; margin: 0; padding: 0; }}
@@ -167,9 +146,8 @@ html_out = f'''<!doctype html>
   .badge {{ font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: 0.3px; }}
   .badge.source {{ background: #1a1a1a; color: #fff; }}
   .badge.type {{ background: #ede9fe; color: #4c1d95; }}
-  .q-prompt {{ font-size: 15.5px; font-weight: 700; line-height: 1.5; margin: 0 0 12px; }}
+  .q-prompt {{ font-size: 15.5px; font-weight: 700; line-height: 1.5; margin: 0 0 12px; white-space: pre-wrap; }}
   .q-image {{ max-width: 100%; max-height: 320px; display: block; margin: 0 0 14px; border-radius: 8px; border: 1px solid #e5e3dc; }}
-  .img-missing {{ background: #fef3c7; color: #92400e; padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 12px; }}
   .options {{ display: flex; flex-direction: column; gap: 6px; }}
   .opt {{ padding: 9px 13px; border-radius: 8px; border: 1.5px solid #e5e3dc; font-size: 13.5px; }}
   .opt.correct {{ background: #d1fae5; border-color: #059669; color: #065f46; font-weight: 700; }}
@@ -183,29 +161,21 @@ html_out = f'''<!doctype html>
   .pairs-table td {{ padding: 7px 10px; border-bottom: 1px solid #f0ede6; }}
   .order-list {{ font-size: 13.5px; padding-left: 22px; }}
   .order-list li {{ margin-bottom: 4px; }}
-  .shuffled-note {{ font-size: 12px; color: #888; margin-top: 8px; }}
   .conversion-note {{ font-size: 12px; color: #888; margin: 12px 0 0; padding-top: 10px; border-top: 1px dashed #e5e3dc; line-height: 1.5; }}
 </style>
 </head>
 <body>
   <div class="header">
-    <h1>{esc(DISPLAY_TITLE)} &mdash; Question Preview</h1>
-    <p>{total} questions confirmed &middot; {type_summary} &middot; all inserted as <strong>inactive</strong> once uploaded (not visible to students until reviewed)</p>
+    <h1>HSC Year 12 MCQ Batch (2019, 2021, 2022, 2024, 2025) &mdash; Question Preview</h1>
+    <p>{total} questions ready in tools/hsc_ready_to_insert.json &middot; {type_summary} &middot; NOT YET in the live database -- review here first, then insert when ready</p>
   </div>
   <div class="layout">
-    <div class="toc">
-      {''.join(toc_html)}
-    </div>
-    <div class="content">
-      {''.join(card_html)}
-    </div>
+    <div class="toc">{"".join(toc_html)}</div>
+    <div class="content">{"".join(card_html)}</div>
   </div>
 </body>
 </html>'''
 
 with open(OUT_PATH, "w", encoding="utf-8") as f:
     f.write(html_out)
-
-print("Written to", OUT_PATH)
-print("Size (KB):", os.path.getsize(OUT_PATH) // 1024)
-print("Unique images embedded:", len(image_cache))
+print(f"Wrote preview with {total} questions to {OUT_PATH}")

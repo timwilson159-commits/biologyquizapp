@@ -1,6 +1,13 @@
-// Usage: node insert_questions.cjs <confirmed_questions.json> [defaultExamFolder] [defaultExamSlug]
-// Each question may carry its own exam_folder/exam_slug (multi-exam batches);
-// the CLI args are just the fallback for questions that don't.
+// Stages a questions.json (tools/insert_questions.cjs's input shape --
+// `source`, `inquiry_id`, `type`, `prompt`, `options`/`bank`/`pairs`/`items`,
+// `answer`, `image_filename?`) for a LATER bulk insert: uploads each
+// referenced image to the `question-images` bucket now (safe -- invisible to
+// students until a `questions` row references it) and writes the final
+// DB-ready rows to tools/pending_insert/<name>.json. Does NOT touch the
+// `questions` table -- that's a separate, deliberate step (insert_hsc_rows.cjs)
+// run only when everything is ready to go live together.
+//
+// Usage: node stage_batch.cjs <questions.json> <examFolder> <examSlug> <name>
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
@@ -34,9 +41,9 @@ async function uploadImage(examFolder, examSlug, filename) {
 }
 
 (async () => {
-  const [, , questionsPath, defaultExamFolder, defaultExamSlug] = process.argv;
-  if (!questionsPath) {
-    console.error('Usage: node insert_questions.cjs <confirmed_questions.json> [defaultExamFolder] [defaultExamSlug]');
+  const [, , questionsPath, examFolder, examSlug, name] = process.argv;
+  if (!questionsPath || !examFolder || !examSlug || !name) {
+    console.error('Usage: node stage_batch.cjs <questions.json> <examFolder> <examSlug> <name>');
     process.exit(1);
   }
   const questions = JSON.parse(fs.readFileSync(questionsPath, 'utf-8'));
@@ -44,12 +51,9 @@ async function uploadImage(examFolder, examSlug, filename) {
   const imageCache = {};
   const rows = [];
   for (const q of questions) {
-    const examFolder = q.exam_folder || defaultExamFolder;
-    const examSlug = q.exam_slug || defaultExamSlug;
     const imgName = q.image_filename || q.image || null;
     let imageUrl = '';
     if (imgName) {
-      if (!examFolder || !examSlug) throw new Error(`Question needs an image (${imgName}) but has no exam_folder/exam_slug and no default was given: ${q.prompt?.slice(0, 60)}`);
       const cacheKey = `${examSlug}/${imgName}`;
       if (!imageCache[cacheKey]) {
         console.log('Uploading', cacheKey, '...');
@@ -72,9 +76,10 @@ async function uploadImage(examFolder, examSlug, filename) {
     });
   }
 
-  console.log(`Inserting ${rows.length} questions...`);
-  const { data, error } = await supabase.from('questions').insert(rows).select('id');
-  if (error) { console.error('Insert failed:', error); process.exitCode = 1; return; }
-  console.log(`Inserted ${data.length} questions successfully.`);
+  const outDir = path.join(__dirname, 'pending_insert');
+  fs.mkdirSync(outDir, { recursive: true });
+  const outPath = path.join(outDir, `${name}.json`);
+  fs.writeFileSync(outPath, JSON.stringify(rows, null, 2));
+  console.log(`Staged ${rows.length} rows -> ${outPath}`);
   console.log('Unique images uploaded:', Object.keys(imageCache).length);
 })();

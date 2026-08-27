@@ -8,3 +8,11 @@ HTML Exams/
 # Generated review artifacts -- local only, not part of the app
 preview_*.html
 *_preview.html
+tools/hsc_extracted/
+tools/*_confirmed.json
+tools/*_needs_review.json
+tools/*_ready_to_insert.json
+tools/*_skipped.json
+tools/__pycache__/
+tools/pending_insert/*.json
+tools/pending_insert/source_notes/

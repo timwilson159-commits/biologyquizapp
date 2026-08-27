@@ -1,6 +1,11 @@
-// Usage: node insert_questions.cjs <confirmed_questions.json> [defaultExamFolder] [defaultExamSlug]
-// Each question may carry its own exam_folder/exam_slug (multi-exam batches);
-// the CLI args are just the fallback for questions that don't.
+// Prep step for the HSC MCQ pipeline: uploads each unique referenced image to
+// the same `question-images` Supabase storage bucket insert_questions.cjs
+// uses, and writes out the final DB-ready rows (module_id/inquiry_id/type/
+// prompt/image URL/options/bank/pairs/items/answer/hint) -- WITHOUT touching
+// the `questions` table itself. Nothing becomes visible to students until a
+// separate insert step runs tomorrow.
+//
+// Usage: node upload_hsc_images.cjs <confirmed.json> <out_rows.json>
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
@@ -34,9 +39,9 @@ async function uploadImage(examFolder, examSlug, filename) {
 }
 
 (async () => {
-  const [, , questionsPath, defaultExamFolder, defaultExamSlug] = process.argv;
-  if (!questionsPath) {
-    console.error('Usage: node insert_questions.cjs <confirmed_questions.json> [defaultExamFolder] [defaultExamSlug]');
+  const [, , questionsPath, outPath] = process.argv;
+  if (!questionsPath || !outPath) {
+    console.error('Usage: node upload_hsc_images.cjs <confirmed.json> <out_rows.json>');
     process.exit(1);
   }
   const questions = JSON.parse(fs.readFileSync(questionsPath, 'utf-8'));
@@ -44,12 +49,11 @@ async function uploadImage(examFolder, examSlug, filename) {
   const imageCache = {};
   const rows = [];
   for (const q of questions) {
-    const examFolder = q.exam_folder || defaultExamFolder;
-    const examSlug = q.exam_slug || defaultExamSlug;
+    const examFolder = q.exam_folder;
+    const examSlug = q.exam_slug;
     const imgName = q.image_filename || q.image || null;
     let imageUrl = '';
     if (imgName) {
-      if (!examFolder || !examSlug) throw new Error(`Question needs an image (${imgName}) but has no exam_folder/exam_slug and no default was given: ${q.prompt?.slice(0, 60)}`);
       const cacheKey = `${examSlug}/${imgName}`;
       if (!imageCache[cacheKey]) {
         console.log('Uploading', cacheKey, '...');
@@ -72,9 +76,7 @@ async function uploadImage(examFolder, examSlug, filename) {
     });
   }
 
-  console.log(`Inserting ${rows.length} questions...`);
-  const { data, error } = await supabase.from('questions').insert(rows).select('id');
-  if (error) { console.error('Insert failed:', error); process.exitCode = 1; return; }
-  console.log(`Inserted ${data.length} questions successfully.`);
+  fs.writeFileSync(outPath, JSON.stringify(rows, null, 2));
+  console.log(`Wrote ${rows.length} ready-to-insert rows to ${outPath}`);
   console.log('Unique images uploaded:', Object.keys(imageCache).length);
 })();

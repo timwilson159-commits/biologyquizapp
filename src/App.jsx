@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, Fragment } from "react";
 import { supabase } from "./supabaseClient";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -174,18 +174,18 @@ const FORMAT_GUIDE = `[
     "answer": "True"
   },
   {
-    "type": "fill-blank",
-    "prompt": "The ___ is the answer.",
-    "image": "",
-    "answer": "answer",
-    "hint": "Optional hint text"
-  },
-  {
     "type": "word-bank",
     "prompt": "The ___ contains an answer to drag in.",
     "image": "",
     "bank": ["correct answer", "distractor 1", "distractor 2", "distractor 3", "distractor 4"],
     "answer": "correct answer"
+  },
+  {
+    "type": "word-bank",
+    "prompt": "___ synthesises mRNA from a DNA template, and ___ then reads that mRNA to build a polypeptide. (up to 3 blanks, in order; bank can hold up to 8 words)",
+    "image": "",
+    "bank": ["Transcription", "Translation", "Replication", "Mutation", "A ribosome", "An enzyme", "A vector", "A promoter"],
+    "answer": ["Transcription", "Translation"]
   },
   {
     "type": "drag-drop",
@@ -399,8 +399,12 @@ function calcScore(questions, answers) {
 
 function calcQuestionCorrect(q, ans) {
   if (ans === undefined || ans === null) return false;
-  if (q.type === "multiple-choice" || q.type === "true-false" || q.type === "word-bank") return ans === q.answer;
-  if (q.type === "fill-blank") return typeof ans === "string" && ans.trim().toLowerCase() === String(q.answer).toLowerCase();
+  if (q.type === "multiple-choice" || q.type === "true-false") return ans === q.answer;
+  if (q.type === "word-bank") {
+    const answerArr = Array.isArray(q.answer) ? q.answer : [q.answer];
+    const ansArr = Array.isArray(ans) ? ans : [ans];
+    return answerArr.every((a, i) => ansArr[i] === a);
+  }
   if (q.type === "drag-drop") return q.pairs && q.pairs.every(p => ans && ans[p.item] === p.match);
   if (q.type === "ordering") return Array.isArray(ans) && q.answer.every((a, i) => ans[i] === a);
   return false;
@@ -408,13 +412,18 @@ function calcQuestionCorrect(q, ans) {
 
 function hasAnswer(q, ans) {
   if (ans === undefined || ans === null) return false;
-  if (q.type === "fill-blank") return typeof ans === "string" && ans.trim().length > 0;
+  if (q.type === "word-bank") {
+    const answerArr = Array.isArray(q.answer) ? q.answer : [q.answer];
+    const ansArr = Array.isArray(ans) ? ans : [ans];
+    return ansArr.filter(Boolean).length >= answerArr.length;
+  }
   if (q.type === "drag-drop") return q.pairs && q.pairs.some(p => ans[p.item]);
   if (q.type === "ordering") return Array.isArray(ans) && ans.length > 0;
   return true;
 }
 
 function formatCorrectAnswer(q) {
+  if (q.type === "word-bank" && Array.isArray(q.answer)) return q.answer.join(", ");
   if (q.type === "drag-drop") return (q.pairs || []).map(p => `${p.item} → ${p.match}`).join(", ");
   if (q.type === "ordering") return (q.answer || []).join(" → ");
   return String(q.answer);
@@ -1004,66 +1013,82 @@ function MCQ({ q, ans, setAns, revealed, seed }) {
   );
 }
 
-function FillBlank({ q, ans, setAns, revealed }) {
-  const [hint, setHint] = useState(false);
-  const ok = revealed && ans && ans.trim().toLowerCase() === String(q.answer).toLowerCase();
-  return (
-    <div>
-      <QuestionImage src={q.image} />
-      <input style={{ ...S.input, borderColor: revealed ? (ok ? "#059669" : "#dc2626") : "#e5e3dc", background: revealed ? (ok ? "#d1fae5" : "#fee2e2") : "#fff" }}
-        value={ans || ""} onChange={e => !revealed && setAns(e.target.value)} placeholder="Type your answer..." disabled={revealed} />
-      {q.hint && !revealed && (!hint
-        ? <button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm, marginTop: 8 }} onClick={() => setHint(true)}>Show hint</button>
-        : <p style={{ fontSize: 13, color: "#666", marginTop: 8 }}>Hint: {q.hint}</p>)}
-      {revealed && <p style={{ fontSize: 13, marginTop: 8, color: ok ? "#065f46" : "#7f1d1d" }}>{ok ? "Correct!" : `Correct answer: ${q.answer}`}</p>}
-    </div>
-  );
-}
-
+// Word Bank supports 1-3 blanks (marked "___" in the prompt, in order). Legacy
+// single-blank questions store `answer` as a plain string; multi-blank ones
+// store it as an array in blank order -- normalised to an array internally so
+// both shapes render identically.
 function WordBank({ q, ans, setAns, revealed, seed }) {
   const [dragging, setDragging] = useState(null);
   const bank = seededShuffle(q.bank || [], seed || "default");
-  const placed = ans || null;
-
-  const drop = () => {
-    if (!dragging || revealed) return;
-    setAns(dragging);
-    setDragging(null);
-  };
-
-  const clear = () => {
-    if (revealed) return;
-    setAns(null);
-  };
-
-  const ok = revealed && placed === q.answer;
-  const bad = revealed && placed && placed !== q.answer;
+  const answerArr = Array.isArray(q.answer) ? q.answer : [q.answer];
   const promptParts = q.prompt.split("___");
+  const blanksCount = promptParts.length - 1;
+  const placed = Array.isArray(ans) ? ans : (ans != null ? [ans] : []);
+
+  const placeWord = (word, blankIdx) => {
+    if (revealed) return;
+    const next = [...placed];
+    while (next.length < blanksCount) next.push(null);
+    const existingIdx = next.indexOf(word);
+    if (existingIdx !== -1) next[existingIdx] = null; // moving a word frees its old blank
+    next[blankIdx] = word;
+    setAns(next);
+  };
+
+  const clearBlank = blankIdx => {
+    if (revealed) return;
+    const next = [...placed];
+    next[blankIdx] = null;
+    setAns(next);
+  };
+
+  const clickBankWord = word => {
+    if (revealed || placed.includes(word)) return; // remove via clicking the blank itself, not the bank tile
+    const next = [...placed];
+    while (next.length < blanksCount) next.push(null);
+    const emptyIdx = next.findIndex(w => !w);
+    if (emptyIdx === -1) return;
+    next[emptyIdx] = word;
+    setAns(next);
+  };
+
+  const allCorrect = revealed && answerArr.every((a, i) => placed[i] === a);
 
   return (
     <div>
       <QuestionImage src={q.image} />
       <div style={{ fontSize: 16.5, lineHeight: 2, marginBottom: 20, padding: "18px 20px", background: C.canvas, borderRadius: 14, border: `1px solid ${C.line}`, color: C.ink, fontWeight: 500 }}>
-        {promptParts[0]}
-        <span onDragOver={e => e.preventDefault()} onDrop={drop} onClick={placed && !revealed ? clear : undefined}
-          style={{
-            display: "inline-block", minWidth: 130, padding: "6px 14px", margin: "0 5px", borderRadius: 10,
-            border: `2px ${placed ? "solid" : "dashed"} ${ok ? C.good : bad ? C.bad : placed ? C.brand : C.faint}`,
-            background: ok ? C.goodBg : bad ? C.badBg : placed ? "rgba(14,165,122,.08)" : "transparent",
-            color: ok ? "#065F46" : bad ? "#9F1239" : C.ink, fontWeight: 700, textAlign: "center",
-            cursor: placed && !revealed ? "pointer" : "default", verticalAlign: "middle", transition: "all .18s",
-          }}>
-          {placed || <span style={{ color: C.faint, fontStyle: "italic", fontWeight: 500, fontSize: 14 }}>drop word here</span>}
-        </span>
-        {promptParts[1] || ""}
+        {promptParts.map((part, i) => {
+          const word = placed[i];
+          const ok = revealed && word === answerArr[i];
+          const bad = revealed && word && word !== answerArr[i];
+          return (
+            <Fragment key={i}>
+              {part}
+              {i < blanksCount && (
+                <span onDragOver={e => e.preventDefault()} onDrop={() => { if (dragging) { placeWord(dragging, i); setDragging(null); } }}
+                  onClick={word && !revealed ? () => clearBlank(i) : undefined}
+                  style={{
+                    display: "inline-block", minWidth: 130, padding: "6px 14px", margin: "0 5px", borderRadius: 10,
+                    border: `2px ${word ? "solid" : "dashed"} ${ok ? C.good : bad ? C.bad : word ? C.brand : C.faint}`,
+                    background: ok ? C.goodBg : bad ? C.badBg : word ? "rgba(14,165,122,.08)" : "transparent",
+                    color: ok ? "#065F46" : bad ? "#9F1239" : C.ink, fontWeight: 700, textAlign: "center",
+                    cursor: word && !revealed ? "pointer" : "default", verticalAlign: "middle", transition: "all .18s",
+                  }}>
+                  {word || <span style={{ color: C.faint, fontStyle: "italic", fontWeight: 500, fontSize: 14 }}>drop word here</span>}
+                </span>
+              )}
+            </Fragment>
+          );
+        })}
       </div>
       <p style={{ ...S.eyebrow, marginBottom: 10 }}>Word Bank</p>
       <div style={{ display: "flex", gap: 9, flexWrap: "wrap" }}>
         {bank.map(word => {
-          const isPlaced = placed === word;
+          const isPlaced = placed.includes(word);
           return (
             <div key={word} draggable={!revealed && !isPlaced} onDragStart={() => setDragging(word)}
-              onClick={() => { if (!revealed && !isPlaced) setAns(word); }}
+              onClick={() => clickBankWord(word)}
               style={{
                 padding: "10px 16px", border: `1.5px solid ${isPlaced ? C.line : C.line}`, borderRadius: 11,
                 cursor: revealed || isPlaced ? "default" : "grab", fontSize: 14.5, fontWeight: 700, fontFamily: FONT,
@@ -1077,12 +1102,12 @@ function WordBank({ q, ans, setAns, revealed, seed }) {
         })}
       </div>
       {revealed && (
-        <div className="bqc-rise" style={{ marginTop: 14, padding: "12px 15px", borderRadius: 12, background: ok ? C.goodBg : C.badBg, color: ok ? C.good : C.bad, fontSize: 13.5, fontWeight: 700 }}>
-          {ok ? "✓ Correct!" : `Correct answer: ${q.answer}`}
+        <div className="bqc-rise" style={{ marginTop: 14, padding: "12px 15px", borderRadius: 12, background: allCorrect ? C.goodBg : C.badBg, color: allCorrect ? C.good : C.bad, fontSize: 13.5, fontWeight: 700 }}>
+          {allCorrect ? "✓ Correct!" : (blanksCount > 1 ? `Correct answers: ${answerArr.join(", ")}` : `Correct answer: ${answerArr[0]}`)}
         </div>
       )}
       {!revealed && <p style={{ fontSize: 12.5, color: C.muted, marginTop: 12, fontWeight: 600 }}>
-        {placed ? "Tip: click the blank to clear it." : "Tip: drag a word into the blank, or just tap it."}
+        {placed.some(Boolean) ? "Tip: click a filled blank to clear it." : `Tip: drag a word into ${blanksCount > 1 ? "a blank" : "the blank"}, or just tap it.`}
       </p>}
     </div>
   );
@@ -1228,7 +1253,6 @@ function Ordering({ q, ans, setAns, revealed }) {
 function QuestionRenderer({ q, ans, setAns, revealed, seed }) {
   if (!q) return null;
   if (q.type === "multiple-choice" || q.type === "true-false") return <MCQ q={q} ans={ans} setAns={setAns} revealed={revealed} seed={seed} />;
-  if (q.type === "fill-blank") return <FillBlank q={q} ans={ans} setAns={setAns} revealed={revealed} />;
   if (q.type === "word-bank") return <WordBank q={q} ans={ans} setAns={setAns} revealed={revealed} seed={seed} />;
   if (q.type === "drag-drop") return <DragDrop q={q} ans={ans} setAns={setAns} revealed={revealed} seed={seed} />;
   if (q.type === "ordering") return <Ordering q={q} ans={ans} setAns={setAns} revealed={revealed} />;
@@ -1445,7 +1469,10 @@ function PracticeSession({ scopeType, scopeId, scopeLabel, color, pool, count, u
 
   const setAns = val => {
     setAnswers(p => ({ ...p, [q.id]: val }));
-    if (AUTO_REVEAL_TYPES.includes(q.type)) setRevealedIds(p => ({ ...p, [q.id]: true }));
+    // hasAnswer(q, val) gates this on ALL blanks being filled for multi-blank
+    // word-bank, not just the first one -- for every other auto-reveal type
+    // (MCQ/true-false/single-blank word-bank) it's equivalent to "any answer".
+    if (AUTO_REVEAL_TYPES.includes(q.type) && hasAnswer(q, val)) setRevealedIds(p => ({ ...p, [q.id]: true }));
   };
   const checkAnswer = () => setRevealedIds(p => ({ ...p, [q.id]: true }));
 
@@ -2446,6 +2473,16 @@ function QuestionEditor({ question, onSave, onCancel }) {
   const updateField = (field, value) => setQ(prev => ({ ...prev, [field]: value }));
   const updatePair = (idx, field, value) => { const newPairs = [...(q.pairs || [])]; newPairs[idx] = { ...newPairs[idx], [field]: value }; setQ(prev => ({ ...prev, pairs: newPairs })); };
   const updateItem = (idx, value) => { const newItems = [...(q.items || [])]; newItems[idx] = value; setQ(prev => ({ ...prev, items: newItems })); };
+  const updateBankWord = (idx, value) => { const nb = [...(q.bank || [])]; while (nb.length < 8) nb.push(""); nb[idx] = value; setQ(prev => ({ ...prev, bank: nb })); };
+  // blankIdx -1 clears a word's assignment (marks it a distractor); otherwise
+  // assigns it to that blank, stealing the slot from any other word that had it.
+  const setWordBankAnswerSlot = (word, blankIdx, blanksCount) => {
+    const cur = Array.isArray(q.answer) ? [...q.answer] : (q.answer ? [q.answer] : []);
+    while (cur.length < blanksCount) cur.push("");
+    for (let i = 0; i < cur.length; i++) if (cur[i] === word) cur[i] = "";
+    if (blankIdx >= 0) cur[blankIdx] = word;
+    setQ(prev => ({ ...prev, answer: blanksCount === 1 ? (cur[0] || "") : cur }));
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -2454,7 +2491,6 @@ function QuestionEditor({ question, onSave, onCancel }) {
         <select value={q.type || ""} onChange={e => setQ({ ...question, type: e.target.value })} style={{ ...S.input, fontFamily: FONT }}>
           <option value="multiple-choice">Multiple Choice</option>
           <option value="true-false">True/False</option>
-          <option value="fill-blank">Fill Blank</option>
           <option value="word-bank">Word Bank</option>
           <option value="drag-drop">Drag Drop (Matching)</option>
           <option value="ordering">Ordering</option>
@@ -2496,27 +2532,31 @@ function QuestionEditor({ question, onSave, onCancel }) {
         </div>
       )}
 
-      {q.type === "fill-blank" && (
-        <div>
-          <label style={S.label}>Correct Answer</label>
-          <input value={q.answer || ""} onChange={e => updateField("answer", e.target.value)} style={S.input} placeholder="Type the correct answer here" />
-          <p style={{ fontSize: 12, color: "#888", margin: "4px 0 0" }}>Note: Use ___ in the prompt to mark the blank</p>
-        </div>
-      )}
-
-      {q.type === "word-bank" && (
-        <div>
-          <label style={S.label}>Word Bank (5 words: 1 correct, 4 distractors)</label>
-          {[0, 1, 2, 3, 4].map(i => (
-            <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
-              <input value={q.bank?.[i] || ""} onChange={e => { const nb = [...(q.bank || ["", "", "", "", ""])]; nb[i] = e.target.value; setQ(prev => ({ ...prev, bank: nb })); }}
-                style={{ ...S.input, flex: 1 }} placeholder={`Word ${i + 1}`} />
-              <input type="radio" name="bankAnswer" checked={q.answer === q.bank?.[i]} onChange={() => updateField("answer", q.bank?.[i])} style={{ width: 20, height: 20, cursor: "pointer" }} title="Select as correct answer" />
-            </div>
-          ))}
-          <p style={{ fontSize: 12, color: "#888", margin: "4px 0 0" }}>Note: Use ___ in the prompt to mark the blank</p>
-        </div>
-      )}
+      {q.type === "word-bank" && (() => {
+        const blanksCount = Math.max(1, Math.min(3, ((q.prompt || "").match(/___/g) || []).length || 1));
+        const answerArr = Array.isArray(q.answer) ? q.answer : (q.answer ? [q.answer] : []);
+        return (
+          <div>
+            <label style={S.label}>Word Bank (up to 8 words) — prompt has {blanksCount} blank{blanksCount > 1 ? "s" : ""}</label>
+            {Array.from({ length: 8 }).map((_, i) => {
+              const word = q.bank?.[i] || "";
+              const assignedBlank = word ? answerArr.indexOf(word) : -1;
+              return (
+                <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
+                  <input value={word} onChange={e => updateBankWord(i, e.target.value)} style={{ ...S.input, flex: 1 }} placeholder={`Word ${i + 1}`} />
+                  <select value={String(assignedBlank)} disabled={!word}
+                    onChange={e => setWordBankAnswerSlot(word, Number(e.target.value), blanksCount)}
+                    style={{ ...S.input, width: 140, fontFamily: FONT }}>
+                    <option value="-1">Distractor</option>
+                    {Array.from({ length: blanksCount }).map((_, b) => <option key={b} value={b}>Blank {b + 1}</option>)}
+                  </select>
+                </div>
+              );
+            })}
+            <p style={{ fontSize: 12, color: "#888", margin: "4px 0 0" }}>Note: use ___ in the prompt for each blank (up to 3, in order). Mark which bank word is correct for each blank above.</p>
+          </div>
+        );
+      })()}
 
       {q.type === "drag-drop" && (
         <div>

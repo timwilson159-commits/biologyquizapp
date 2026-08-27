@@ -336,7 +336,7 @@ const FORMAT_NOTES = `
 Platform question types and their JSON shape (NO fill-blank / typed-answer type exists in this batch -- every question must be one of these five):
 - multiple-choice: { type, prompt, image: null, options: [4 strings], answer: <one of options, exact string match> }
 - true-false: { type, prompt, image: null, options: ["True","False"], answer: "True"|"False" }
-- word-bank: { type, prompt (use ___ to mark the blank), image: null, bank: [5 strings: 1 correct + 4 distractors], answer: "<the correct string, must match one bank entry exactly>" }
+- word-bank: { type, prompt, image: null, bank: [3-8 strings: the correct word(s) + distractors], answer }. Mark each blank with "___", in order -- 1 to 3 blanks per question. 1 blank: answer is a single string matching one bank entry exactly. 2-3 blanks: answer is an array of strings in the same order as the blanks, each matching one bank entry exactly; the bank holds every blank's correct word plus distractors, up to 8 entries total.
 - drag-drop: { type, prompt, image: null, pairs: [{item,match}, ...] (3-6 pairs), answer: {"<item>":"<match>", ...} }
 - ordering: { type, prompt, image: null, items: [4-6 strings in correct order], answer: [same strings, in the correct order] }
 Every question's "image" field must be null -- this batch is text-only by design (no image generation).
@@ -345,7 +345,7 @@ Every question's "image" field must be null -- this batch is text-only by design
 const FAIRNESS_RULES = `
 FAIRNESS & FORMAT RULES (apply strictly):
 - NEVER produce a fill-blank or any question requiring a typed free-text answer. Every question must be multiple-choice, true-false, word-bank, drag-drop, or ordering.
-- Never use word-bank for a numeric/calculated answer, or any answer whose exact wording could reasonably vary. word-bank should only be used for a single, unambiguous term or short phrase with no reasonable alternative phrasing. If in doubt, use multiple-choice instead, spelling the value/wording out in full inside each option.
+- Never use word-bank for a numeric/calculated answer, or any answer whose exact wording could reasonably vary. Every blank must be a single, unambiguous term or short phrase with no reasonable alternative phrasing. If in doubt, use multiple-choice instead, spelling the value/wording out in full inside each option. A multi-blank (2-3) word-bank is a good fit when the outcome naturally names two or three distinct terms in one sentence -- don't force it onto content that only has one natural blank.
 - Across this outcome's 3-5 questions, vary the type where the content naturally suits it -- don't make every single one multiple-choice, but also don't force an unnatural fit (e.g. don't invent a strained "ordering" question for content that has no real sequence) just for variety in such a small batch.
 - If a named example is specified in this outcome's context, use ONLY that example -- do not substitute a different real-world case, and do not invent details about it you're not confident are accurate. If a question depends on a background fact about the example (e.g. which organism/bacterium is involved), state that fact within the question text itself rather than assuming the student already knows it.
 - If a question can't be made fair and unambiguous within the 5 supported types, don't force it through on a guess -- flag it for human review instead (see verdict options below) rather than shipping something a student could get wrong purely from unclear wording rather than not knowing the biology.

@@ -60,9 +60,18 @@ def build_transcript(html_content):
     body_idx = html_content.find("<body")
     content = html_content[body_idx:] if body_idx != -1 else html_content
 
-    # image markers
+    # image markers -- drop decorative images (thin rule lines used to render
+    # blank ruled answer space, tiny spacer icons, etc). A real content image
+    # is never a few pixels tall or wide; anything under this is decoration.
+    MIN_CONTENT_DIMENSION = 15
+
     def img_marker(m):
-        src = re.search(r'src="([^"]+)"', m.group(0))
+        tag = m.group(0)
+        src = re.search(r'src="([^"]+)"', tag)
+        w = re.search(r'width="(\d+)"', tag)
+        h = re.search(r'height="(\d+)"', tag)
+        if w and h and (int(w.group(1)) < MIN_CONTENT_DIMENSION or int(h.group(1)) < MIN_CONTENT_DIMENSION):
+            return ""
         return f'\n[[IMG:{src.group(1) if src else "?"}]]\n' if src else ""
     content = re.sub(r"<img[^>]*>", img_marker, content)
 
@@ -132,26 +141,48 @@ def split_chunks(transcript, exam_title_hint=None):
     q_markers = [(m.start(), m.group(1)) for m in re.finditer(r"\nQuestion (\d+) \(", "\n" + transcript)]
     ext_start = q_markers[0][0] if q_markers else None
 
+    # Figure out where the "solutions booklet" replay of the extended-response
+    # section begins -- the 2nd occurrence of the very first question number
+    # (since the replay restates Q16, 17, 18... in the same order). This is a
+    # much more reliable anchor than any particular phrase ("End of Section I"
+    # isn't used by every school), and everything below uses it.
+    positions_by_num = {}
+    order = []
+    for pos, num in q_markers:
+        if num not in positions_by_num:
+            positions_by_num[num] = []
+            order.append(num)
+        positions_by_num[num].append(pos)
+
+    end_of_exam = transcript.find("End of examination")
+    doc_end = end_of_exam if end_of_exam != -1 else len(transcript)
+    if order:
+        first_num_positions = positions_by_num[order[0]]
+        solutions_start = first_num_positions[1] if len(first_num_positions) > 1 else doc_end
+    else:
+        solutions_start = doc_end
+
     # The MCQ section is normally printed twice: once as asked (no answers marked)
     # and once inside the solutions booklet (correct option highlighted -- see the
-    # **{color:...}** markers from build_transcript). We need the SECOND copy, since
-    # that's the only one carrying the answer. It sits between the two "End of
-    # Section I" markers (response-booklet filler pages in between are harmless
-    # noise -- the drafting agent will recognise blank bubble lists and ignore them).
-    end_positions = [m.start() for m in re.finditer(r"End of Section I", transcript)]
-    if len(end_positions) >= 2:
-        region = transcript[end_positions[-2]: end_positions[-1]]
-    elif len(end_positions) == 1:
-        region = transcript[:end_positions[0]]  # no solutions copy -- best effort, unanswered
-    else:
-        region = transcript[:ext_start] if ext_start else transcript
-
-    # Within `region` there is usually a blank answer-booklet page ("Select the
-    # alternative... fill in the response circle completely" followed by a bare
-    # "1. A B C D / 2. A B C D / ...") BEFORE the actual solutions-highlighted
-    # Q1-15 content -- so take the LAST match of the instructions phrase, not the
-    # first, so we land on the real (answered) copy.
-    start_matches = list(re.finditer(r"Select the alternative|Fill in the response (circle|oval) completely\.", region))
+    # **{color:...}** markers from build_transcript). We need the SECOND copy,
+    # since that's the only one carrying the answer -- it always sits somewhere
+    # before solutions_start (the extended-response solutions replay always comes
+    # after the restated, answered MCQ section). Within that region there is
+    # usually a blank answer-booklet page ("Select the alternative... fill in the
+    # response circle completely" followed by a bare "1. A B C D / 2. ...")
+    # BEFORE the actual solutions-highlighted MCQs -- so take the LAST matching
+    # instructions phrase before solutions_start, not the first, to land on the
+    # real (answered) copy rather than a blank booklet repeat.
+    region = transcript[:solutions_start]
+    # Blank answer-booklet filler pages also contain "Select the alternative..."
+    # (lowercase "fill in the response circle completely" mid-sentence), so that
+    # phrase alone is ambiguous. The real instructions header is reliably the only
+    # place with a standalone, capitalised "Fill in the response circle/oval
+    # completely." sentence -- prefer that anchor, and only fall back to the
+    # broader phrase if this exam's export doesn't have it at all.
+    start_matches = list(re.finditer(r"Fill in the response (circle|oval) completely\.", region))
+    if not start_matches:
+        start_matches = list(re.finditer(r"Select the alternative", region))
     mcq_text = region[start_matches[-1].start():] if start_matches else region
 
     lines = mcq_text.split("\n")
@@ -178,31 +209,19 @@ def split_chunks(transcript, exam_title_hint=None):
     # without swallowing unrelated pages (blank answer sheets, cover pages, etc.)
     # in between.
     if q_markers:
-        positions_by_num = {}
-        order = []
-        for pos, num in q_markers:
-            if num not in positions_by_num:
-                positions_by_num[num] = []
-                order.append(num)
-            positions_by_num[num].append(pos)
-
-        end_of_exam = transcript.find("End of examination")
-        doc_end = end_of_exam if end_of_exam != -1 else len(transcript)
-        # Where the whole "solutions booklet" replay begins: the 2nd occurrence of
-        # the very first question number (since the replay restates Q16, 17, 18...
-        # in the same order). The LAST original question's occurrence-0 must be
-        # capped here -- NOT at its own 2nd occurrence, which comes much later
-        # since the replay runs through every other question first.
-        first_num = order[0]
-        first_num_positions = positions_by_num[first_num]
-        solutions_start = first_num_positions[1] if len(first_num_positions) > 1 else doc_end
-        # The LAST original question is immediately followed by an "Extra page:"
-        # (working space) marker, then a whole repeated MCQ-solutions section
-        # before the extended-response solutions replay begins -- so cap there
-        # too, whichever comes first.
-        extra_page_pos = transcript.find("Extra page")
-        if extra_page_pos != -1:
-            solutions_start = min(solutions_start, extra_page_pos)
+        # The LAST original question is immediately followed by some kind of
+        # "end of this part" marker (wording varies by school), then a whole
+        # repeated MCQ-solutions section before the extended-response solutions
+        # replay begins -- so cap there too, whichever comes first. This is
+        # best-effort: if a school uses different wording again, the LAST
+        # question's chunk may pick up some harmless extra front-matter before
+        # its real "MARKING CRITERIA" section, which the drafting agent can
+        # still work with correctly, just with some wasted context.
+        search_from = ext_start if ext_start is not None else 0
+        for marker in ("Extra page", "END OF PAPER", "End of examination"):
+            pos = transcript.find(marker, search_from, solutions_start)
+            if pos != -1:
+                solutions_start = min(solutions_start, pos)
 
         def bound_of(occurrence_index, num):
             """End boundary for `occurrence_index`-th occurrence of question `num`:
