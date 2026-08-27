@@ -4,7 +4,7 @@ import { supabase } from "./supabaseClient";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 const ADMIN_PASSWORD = "admin123"; // fallback only -- real password lives in Supabase (app_settings), see admin_password_setup.sql
-const SCHOOL_NAME = "Biology Quiz Centre";
+const SCHOOL_NAME = "Woonona High Biology";
 const FLAG_REASONS = [
   { id: "confusing", label: "Confusing wording", icon: "😕" },
   { id: "difficult", label: "Too difficult", icon: "😤" },
