@@ -2892,6 +2892,16 @@ function AdminFlags({ flagsApi, questions, questionsApi }) {
                 </div>
                 <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
                   {q && <button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm }} onClick={() => setEditing(q)}>Edit Question</button>}
+                  {q && (
+                    <button style={{ ...S.btn, ...S.btnDanger, ...S.btnSm }}
+                      onClick={async () => {
+                        if (!confirm("Delete this question entirely? This removes it for all students and clears this flag.")) return;
+                        await questionsApi.deleteQuestion(q.id);
+                        await flagsApi.reload();
+                      }}>
+                      Delete Question
+                    </button>
+                  )}
                   <button style={{ ...S.btn, ...S.btnSuccess, ...S.btnSm }} onClick={() => flagsApi.resolveFlag(f.id)}>Resolve</button>
                 </div>
               </div>
@@ -2977,8 +2987,29 @@ function AdminStudents({ users, usersApi }) {
   const [bulkErr, setBulkErr] = useState("");
   const [selected, setSelected] = useState([]);
   const [printCards, setPrintCards] = useState(null); // array of {code, name} or null
+  const [yearFilter, setYearFilter] = useState("all");
+  const [classFilter, setClassFilter] = useState("all");
+  const [sort, setSort] = useState({ field: "code", dir: "asc" });
 
   const codes = Object.keys(users).sort();
+  const allYears = useMemo(() => [...new Set(codes.map(c => String(users[c].year || "").trim()).filter(Boolean))].sort(), [users]);
+  const allClasses = useMemo(() => [...new Set(codes.map(c => users[c].className).filter(Boolean))].sort(), [users]);
+
+  const toggleSort = (field) => setSort(s => s.field === field ? { field, dir: s.dir === "asc" ? "desc" : "asc" } : { field, dir: "asc" });
+  const sortArrow = (field) => sort.field !== field ? "" : (sort.dir === "asc" ? " ▲" : " ▼");
+  const sortableTh = (field, label) => (
+    <th style={{ ...S.th, cursor: "pointer", userSelect: "none" }} onClick={() => toggleSort(field)}>{label}{sortArrow(field)}</th>
+  );
+
+  const filteredCodes = useMemo(() => {
+    const field = { code: c => c, name: c => users[c].name, className: c => users[c].className, year: c => users[c].year }[sort.field] || (c => c);
+    return codes
+      .filter(c => (yearFilter === "all" || String(users[c].year || "").trim() === yearFilter) && (classFilter === "all" || users[c].className === classFilter))
+      .sort((a, b) => {
+        const cmp = String(field(a) || "").localeCompare(String(field(b) || ""), undefined, { numeric: true, sensitivity: "base" });
+        return sort.dir === "asc" ? cmp : -cmp;
+      });
+  }, [codes, users, yearFilter, classFilter, sort]);
 
   const addSingle = async () => {
     if (!form.code.trim() || !form.name.trim()) return;
@@ -3006,16 +3037,29 @@ function AdminStudents({ users, usersApi }) {
 
   return (
     <div>
+      <div style={{ display: "flex", gap: 10, marginBottom: "1rem", flexWrap: "wrap", alignItems: "center" }}>
+        <select style={{ ...S.input, width: "auto", minWidth: 140 }} value={yearFilter} onChange={e => setYearFilter(e.target.value)}>
+          <option value="all">All years</option>
+          {allYears.map(y => <option key={y} value={y}>Year {y}</option>)}
+        </select>
+        <select style={{ ...S.input, width: "auto", minWidth: 160 }} value={classFilter} onChange={e => setClassFilter(e.target.value)}>
+          <option value="all">All classes</option>
+          {allClasses.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        {(yearFilter !== "all" || classFilter !== "all") && (
+          <span style={{ fontSize: 12.5, color: "#888" }}>{filteredCodes.length} of {codes.length} students</span>
+        )}
+      </div>
       <div style={{ display: "flex", gap: 10, marginBottom: "1.25rem", flexWrap: "wrap" }}>
         <button style={{ ...S.btn, ...S.btnPrimary }} onClick={() => setAddOpen(true)}>+ Add Student</button>
         <button style={{ ...S.btn, ...S.btnOutline }} onClick={() => setBulkOpen(true)}>Bulk Import</button>
         <button style={{ ...S.btn, ...S.btnOutline }}
           onClick={() => {
-            const targetCodes = selected.length ? selected : codes;
+            const targetCodes = selected.length ? selected : filteredCodes;
             setPrintCards(targetCodes.map(c => ({ code: c, name: users[c].name })));
           }}
-          disabled={codes.length === 0}>
-          🖨️ Print Login Cards{selected.length > 0 ? ` (${selected.length})` : ""}
+          disabled={filteredCodes.length === 0}>
+          🖨️ Print Login Cards{selected.length > 0 ? ` (${selected.length})` : (yearFilter !== "all" || classFilter !== "all") ? ` (${filteredCodes.length})` : ""}
         </button>
         {selected.length > 0 && (
           <button style={{ ...S.btn, ...S.btnDanger }} onClick={() => { if (confirm(`Remove ${selected.length} student(s)?`)) { usersApi.removeUsersBulk(selected); setSelected([]); } }}>
@@ -3029,15 +3073,15 @@ function AdminStudents({ users, usersApi }) {
           <thead>
             <tr>
               <th style={S.th}></th>
-              <th style={S.th}>Code</th>
-              <th style={S.th}>Name</th>
-              <th style={S.th}>Class</th>
-              <th style={S.th}>Year</th>
+              {sortableTh("code", "Code")}
+              {sortableTh("name", "Name")}
+              {sortableTh("className", "Class")}
+              {sortableTh("year", "Year")}
               <th style={S.th}></th>
             </tr>
           </thead>
           <tbody>
-            {codes.map(code => (
+            {filteredCodes.map(code => (
               <tr key={code}>
                 <td style={S.td}><input type="checkbox" checked={selected.includes(code)} onChange={() => toggleSelect(code)} /></td>
                 <td style={S.td}>{code}</td>
@@ -3047,7 +3091,7 @@ function AdminStudents({ users, usersApi }) {
                 <td style={S.td}><button style={{ ...S.btn, ...S.btnDanger, ...S.btnSm }} onClick={() => { if (confirm(`Remove ${code}?`)) usersApi.removeUser(code); }}>Remove</button></td>
               </tr>
             ))}
-            {codes.length === 0 && <tr><td style={S.td} colSpan={6}><span style={{ color: "#aaa" }}>No students yet.</span></td></tr>}
+            {filteredCodes.length === 0 && <tr><td style={S.td} colSpan={6}><span style={{ color: "#aaa" }}>No students match this filter.</span></td></tr>}
           </tbody>
         </table>
       </div>
@@ -3094,6 +3138,12 @@ function AdminStudents({ users, usersApi }) {
 function AdminProgress({ users }) {
   const { attempts, loading } = useAllAttempts();
   const codes = Object.keys(users).sort();
+  const [yearFilter, setYearFilter] = useState("all");
+  const [classFilter, setClassFilter] = useState("all");
+  const [sort, setSort] = useState({ field: "name", dir: "asc" });
+
+  const allYears = useMemo(() => [...new Set(codes.map(c => String(users[c].year || "").trim()).filter(Boolean))].sort(), [users]);
+  const allClasses = useMemo(() => [...new Set(codes.map(c => users[c].className).filter(Boolean))].sort(), [users]);
 
   const statsFor = (code) => {
     const mine = attempts.filter(a => a.user_code === code);
@@ -3104,37 +3154,103 @@ function AdminProgress({ users }) {
     return { attemptCount: mine.length, totalQuestions, avgPct, lastActive: last?.submitted_at };
   };
 
+  const toggleSort = (field) => setSort(s => s.field === field ? { field, dir: s.dir === "asc" ? "desc" : "asc" } : { field, dir: field === "name" ? "asc" : "desc" });
+  const sortArrow = (field) => sort.field !== field ? "" : (sort.dir === "asc" ? " ▲" : " ▼");
+  const sortableTh = (field, label) => (
+    <th style={{ ...S.th, cursor: "pointer", userSelect: "none" }} onClick={() => toggleSort(field)}>{label}{sortArrow(field)}</th>
+  );
+
+  const rows = useMemo(() => {
+    const withStats = codes
+      .filter(c => (yearFilter === "all" || String(users[c].year || "").trim() === yearFilter) && (classFilter === "all" || users[c].className === classFilter))
+      .map(c => ({ code: c, ...statsFor(c) }));
+    const value = { name: r => users[r.code].name, attemptCount: r => r.attemptCount, totalQuestions: r => r.totalQuestions, avgPct: r => r.avgPct ?? -1, lastActive: r => r.lastActive || "" }[sort.field];
+    withStats.sort((a, b) => {
+      const va = value(a), vb = value(b);
+      const cmp = typeof va === "number" ? va - vb : String(va).localeCompare(String(vb), undefined, { numeric: true, sensitivity: "base" });
+      return sort.dir === "asc" ? cmp : -cmp;
+    });
+    return withStats;
+  }, [codes, users, attempts, yearFilter, classFilter, sort]);
+
+  // Class leaderboard: ranked by total correct answers, computed from the
+  // already-loaded attempts so this needs no extra query.
+  const leaderboard = useMemo(() => {
+    if (classFilter === "all") return null;
+    const classCodes = codes.filter(c => users[c].className === classFilter);
+    const totals = {};
+    attempts.forEach(a => { if (classCodes.includes(a.user_code)) totals[a.user_code] = (totals[a.user_code] || 0) + (a.correct || 0); });
+    const ranked = classCodes
+      .map(c => ({ code: c, name: users[c].name, correct: totals[c] || 0 }))
+      .sort((a, b) => b.correct - a.correct || a.name.localeCompare(b.name));
+    let rank = 0, lastScore = null;
+    ranked.forEach((r, i) => { if (r.correct !== lastScore) { rank = i + 1; lastScore = r.correct; } r.rank = rank; });
+    return ranked;
+  }, [classFilter, codes, users, attempts]);
+
   return (
     <div>
-      <p style={{ fontSize: 13, color: "#666", margin: "0 0 1.25rem" }}>This is a revision tool, so the focus is on practice volume rather than single scores — how much each student is actually practising.</p>
+      <p style={{ fontSize: 13, color: "#666", margin: "0 0 1rem" }}>This is a revision tool, so the focus is on practice volume rather than single scores — how much each student is actually practising.</p>
+
+      <div style={{ display: "flex", gap: 10, marginBottom: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
+        <select style={{ ...S.input, width: "auto", minWidth: 140 }} value={yearFilter} onChange={e => setYearFilter(e.target.value)}>
+          <option value="all">All years</option>
+          {allYears.map(y => <option key={y} value={y}>Year {y}</option>)}
+        </select>
+        <select style={{ ...S.input, width: "auto", minWidth: 160 }} value={classFilter} onChange={e => setClassFilter(e.target.value)}>
+          <option value="all">All classes</option>
+          {allClasses.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        {(yearFilter !== "all" || classFilter !== "all") && (
+          <span style={{ fontSize: 12.5, color: "#888" }}>{rows.length} of {codes.length} students</span>
+        )}
+      </div>
+
+      {classFilter !== "all" && leaderboard && (
+        <div style={{ ...S.card, marginBottom: "1.25rem" }}>
+          <h3 style={{ ...S.h3, marginBottom: 10 }}>🏆 {classFilter} Leaderboard</h3>
+          {leaderboard.length === 0 ? (
+            <p style={{ color: "#aaa", margin: 0, fontSize: 13.5 }}>No students in this class yet.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {leaderboard.map(r => (
+                <div key={r.code} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 4px", borderBottom: `1px solid ${C.lineSoft}` }}>
+                  <span style={{ fontSize: 13.5 }}><b style={{ color: C.muted, marginRight: 8 }}>#{r.rank}</b>{r.name} <span style={{ color: "#aaa" }}>({r.code})</span></span>
+                  <span style={{ fontWeight: 800, color: C.brandDeep }}>{r.correct} correct</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {loading && <p style={{ color: "#888" }}>Loading...</p>}
       {!loading && (
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
-                <th style={S.th}>Student</th>
-                <th style={S.th}>Attempts</th>
-                <th style={S.th}>Questions Practised</th>
-                <th style={S.th}>Avg Score</th>
-                <th style={S.th}>Last Active</th>
+                {sortableTh("name", "Student")}
+                {sortableTh("attemptCount", "Attempts")}
+                {sortableTh("totalQuestions", "Questions Practised")}
+                {sortableTh("avgPct", "Avg Score")}
+                {sortableTh("lastActive", "Last Active")}
               </tr>
             </thead>
             <tbody>
-              {codes.map(code => {
-                const s = statsFor(code);
-                const gc = gradientColor(s.avgPct);
+              {rows.map(r => {
+                const gc = gradientColor(r.avgPct);
                 return (
-                  <tr key={code}>
-                    <td style={S.td}>{users[code].name} <span style={{ color: "#aaa" }}>({code})</span></td>
-                    <td style={S.td}>{s.attemptCount}</td>
-                    <td style={S.td}>{s.totalQuestions}</td>
-                    <td style={S.td}>{s.avgPct !== null ? <span style={{ ...S.badge, background: gc.bg, color: gc.text }}>{s.avgPct}%</span> : <span style={{ color: "#ccc" }}>—</span>}</td>
-                    <td style={S.td}>{s.lastActive ? new Date(s.lastActive).toLocaleDateString() : <span style={{ color: "#ccc" }}>—</span>}</td>
+                  <tr key={r.code}>
+                    <td style={S.td}>{users[r.code].name} <span style={{ color: "#aaa" }}>({r.code})</span></td>
+                    <td style={S.td}>{r.attemptCount}</td>
+                    <td style={S.td}>{r.totalQuestions}</td>
+                    <td style={S.td}>{r.avgPct !== null ? <span style={{ ...S.badge, background: gc.bg, color: gc.text }}>{r.avgPct}%</span> : <span style={{ color: "#ccc" }}>—</span>}</td>
+                    <td style={S.td}>{r.lastActive ? new Date(r.lastActive).toLocaleDateString() : <span style={{ color: "#ccc" }}>—</span>}</td>
                   </tr>
                 );
               })}
-              {codes.length === 0 && <tr><td style={S.td} colSpan={5}><span style={{ color: "#aaa" }}>No students yet.</span></td></tr>}
+              {rows.length === 0 && <tr><td style={S.td} colSpan={5}><span style={{ color: "#aaa" }}>No students match this filter.</span></td></tr>}
             </tbody>
           </table>
         </div>
