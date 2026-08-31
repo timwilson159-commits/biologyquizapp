@@ -851,26 +851,40 @@ function useAllAttempts() {
   return { attempts, loading, reload };
 }
 
-// Class-scoped leaderboard: ranked by total questions ever answered correctly
-// (no penalty for wrong answers -- purely a "how much have you got right"
-// count, so more practice always helps rather than risking your rank).
-function useLeaderboard(className) {
+// Class- or year-scoped leaderboard: ranked by total questions ever answered
+// correctly (no penalty for wrong answers -- purely a "how much have you got
+// right" count, so more practice always helps rather than risking your rank).
+// `scope` is either { type: "class", className } or { type: "year", year }.
+function useLeaderboard(scope) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const reload = async () => {
-    if (!className) { setRows([]); setLoading(false); return; }
+    if (!scope || (scope.type === "class" && !scope.className) || (scope.type === "year" && !scope.year)) {
+      setRows([]); setLoading(false); return;
+    }
     setLoading(true);
-    const { data: classmates, error: uErr } = await supabase.from("users").select("code,name").eq("class_name", className);
-    if (uErr || !classmates || !classmates.length) { setRows([]); setLoading(false); return; }
-    const codes = classmates.map(u => u.code);
+
+    let peers;
+    if (scope.type === "class") {
+      const { data, error } = await supabase.from("users").select("code,name").eq("class_name", scope.className);
+      if (error || !data) { setRows([]); setLoading(false); return; }
+      peers = data;
+    } else {
+      const { data, error } = await supabase.from("users").select("code,name,year");
+      if (error || !data) { setRows([]); setLoading(false); return; }
+      peers = data.filter(u => normalizedYear(u.year) === scope.year);
+    }
+    if (!peers.length) { setRows([]); setLoading(false); return; }
+
+    const codes = peers.map(u => u.code);
     const { data: attempts, error: aErr } = await supabase.from("attempts").select("user_code,correct").in("user_code", codes);
     if (aErr) { setRows([]); setLoading(false); return; }
 
     const totals = {};
     (attempts || []).forEach(a => { totals[a.user_code] = (totals[a.user_code] || 0) + (a.correct || 0); });
 
-    const ranked = classmates
+    const ranked = peers
       .map(u => ({ code: u.code, name: u.name, correct: totals[u.code] || 0 }))
       .sort((a, b) => b.correct - a.correct || a.name.localeCompare(b.name));
 
@@ -885,7 +899,7 @@ function useLeaderboard(className) {
     setLoading(false);
   };
 
-  useEffect(() => { reload(); }, [className]);
+  useEffect(() => { reload(); }, [scope?.type, scope?.className, scope?.year]);
 
   return { rows, loading, reload };
 }
@@ -1805,9 +1819,26 @@ function PodiumSpot({ entry, place, delay }) {
 }
 
 function ClassLeaderboard({ user }) {
-  const { rows, loading } = useLeaderboard(user.className);
+  const courseYear = normalizedYear(user.year);
+  const [mode, setMode] = useState("year"); // "year" | "class" -- defaults to year group
+  const scope = mode === "class"
+    ? { type: "class", className: user.className }
+    : { type: "year", year: courseYear };
+  const { rows, loading } = useLeaderboard(scope);
 
-  if (!user.className) return null;
+  const scopeLabel = mode === "class" ? user.className : `Year ${courseYear}`;
+  const pillBtn = (active) => ({
+    padding: "6px 14px", borderRadius: 999, border: `1.5px solid ${active ? C.brand : C.line}`,
+    background: active ? C.brand : "#fff", color: active ? "#fff" : C.muted,
+    fontWeight: 700, fontSize: 12.5, fontFamily: FONT, cursor: "pointer", transition: "all .15s",
+  });
+
+  const toggle = user.className && (
+    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+      <button style={pillBtn(mode === "year")} onClick={() => setMode("year")}>Year {courseYear}</button>
+      <button style={pillBtn(mode === "class")} onClick={() => setMode("class")}>{user.className}</button>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -1832,17 +1863,20 @@ function ClassLeaderboard({ user }) {
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
             <span style={{ fontSize: 19 }}>🏆</span>
-            <h2 style={S.h2}>Class Leaderboard</h2>
+            <h2 style={S.h2}>Leaderboard</h2>
           </div>
           <p style={{ ...S.sub, fontSize: 13, maxWidth: 460 }}>
-            Ranked by total questions answered correctly in <strong style={{ color: C.ink }}>{user.className}</strong> — wrong guesses never cost you, so every attempt only helps.
+            Ranked by total questions answered correctly in <strong style={{ color: C.ink }}>{scopeLabel}</strong> — wrong guesses never cost you, so every attempt only helps.
           </p>
         </div>
-        {me && me.correct > 0 && (
-          <span style={{ ...S.badge, background: me.rank <= 3 ? C.goodBg : C.lineSoft, color: me.rank <= 3 ? C.good : C.body, fontSize: 12.5, padding: "7px 13px", flexShrink: 0 }}>
-            {me.rank <= 3 ? "🎉 " : ""}You're #{me.rank} of {rows.length}
-          </span>
-        )}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10, flexShrink: 0 }}>
+          {toggle}
+          {me && me.correct > 0 && (
+            <span style={{ ...S.badge, background: me.rank <= 3 ? C.goodBg : C.lineSoft, color: me.rank <= 3 ? C.good : C.body, fontSize: 12.5, padding: "7px 13px" }}>
+              {me.rank <= 3 ? "🎉 " : ""}You're #{me.rank} of {rows.length}
+            </span>
+          )}
+        </div>
       </div>
 
       {anyActivity ? (
@@ -1854,7 +1888,7 @@ function ClassLeaderboard({ user }) {
       ) : (
         <div style={{ position: "relative", textAlign: "center", padding: "1.25rem 1rem 0.5rem" }}>
           <div style={{ fontSize: 34, marginBottom: 8, animation: "bqcFloat 3s ease-in-out infinite" }}>🌱</div>
-          <p style={{ margin: 0, fontSize: 13.5, color: C.body, fontWeight: 600 }}>No one in {user.className} has answered a question yet — be the first on the board!</p>
+          <p style={{ margin: 0, fontSize: 13.5, color: C.body, fontWeight: 600 }}>No one in {scopeLabel} has answered a question yet — be the first on the board!</p>
         </div>
       )}
 
