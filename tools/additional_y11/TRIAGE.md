@@ -53,6 +53,9 @@ uploading to the `question-images` bucket and swapping for real URLs (same
 3. **Generic Working Scientifically questions** with no module-specific content (e.g. "what does reliable/quantitative mean") — left out since they don't belong to any one inquiry question.
 4. **Corrupted source tables** — a few questions rely on a table/diagram whose actual answer-option text is missing from the HTML entirely (not an extraction bug — confirmed via full page render). No amount of interpretation can recover these.
 
-## Next step
-Once you're happy with the question set (and have a call on the Paper 6 Q10 mitosis-sequence discrepancy above), the remaining pipeline is the same as every prior batch:
-upload the referenced images to the `question-images` bucket, resolve them into the JSON rows, then run through `insert_hsc_rows.cjs` (or an equivalent) — nothing goes live until that explicit insert step, and only with your go-ahead.
+## Status: LIVE (pushed 2026-09-01)
+All 90 questions above are now live in the `questions` table (via `tools/stage_additional_y11.cjs` + `insert_hsc_rows.cjs`, images uploaded to the `question-images` bucket under the `additional-y11/` prefix). This folder and `tools/pending_insert/additional-y11-*.json` are now historical staging records, not pending work.
+
+Before inserting, a full image-mapping audit caught and fixed several numbering errors from the first draft (images had been assigned to the wrong question based on assumed ordering rather than direct verification) — most notably Paper 2's food web question, which had the wrong food web structure *and* the wrong answer ("Mice" instead of "Eagle") until corrected against the actual diagram. Every image-bearing question was re-verified against its actual image file before insert.
+
+The Paper 6 Q10 mitosis-sequence question was left dropped (not inserted) — the discrepancy between the supplied key (Sequence 4) and the biologically correct order (Sequence 2, verified by zooming into both diagrams) was never resolved with you. Revisit if wanted.
