@@ -1,0 +1,154 @@
+[
+  {
+    "module_id": "module-1", "inquiry_id": "1.2", "type": "multiple-choice",
+    "prompt": "The flow diagram shows energy transformation in an ecosystem: light energy is captured in process (1), which stores energy in (2), to be used in process (3). Which terms should be in boxes 1, 2 and 3?\n\n(A) 1=photosynthesis, 2=inorganic molecules, 3=cellular respiration\n(B) 1=respiration, 2=inorganic molecules, 3=transpiration\n(C) 1=photosynthesis, 2=organic molecules, 3=cellular respiration\n(D) 1=respiration, 2=organic molecules, 3=photosynthesis",
+    "image": "Paper_6_img01.png", "options": ["Row A", "Row B", "Row C", "Row D"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Row C",
+    "hint": "Light energy is captured by photosynthesis and stored in organic molecules, later released by cellular respiration."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "A typical food chain in Sydney Harbour: phytoplankton -> oyster -> bream -> bull shark. Which organism occupies the level with the smallest biomass?",
+    "image": "", "options": ["Phytoplankton", "Oyster", "Bream", "Bull shark"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Bull shark",
+    "hint": "Biomass decreases at each successive trophic level, so the top predator has the smallest biomass."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "A lichen consists of two different organisms living together: a fungus, which cannot make its own food but does provide shelter, and an alga, which contains chlorophyll. What type of relationship exists between the alga and the fungus?",
+    "image": "Paper_6_img03.png", "options": ["Commensalism", "Mutualism", "Parasitism", "Allelopathy"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Mutualism",
+    "hint": "The alga provides food (via photosynthesis) and the fungus provides shelter — both benefit."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.2", "type": "multiple-choice",
+    "prompt": "Which one of the following correctly matches the major groups of chemical substances with their correct use in living cells?\n\n(A) simple sugars=quick energy, proteins=structure and making enzymes, lipids=storing energy and cell membrane structure, lignin=structure only\n(B) lipids=quick energy, simple sugars=structure and making enzymes, lignin=storing energy and cell membrane structure, proteins=structure only\n(C) proteins=quick energy, lipids=structure and making enzymes, simple sugars=storing energy and cell membrane structure, lignin=structure only\n(D) simple sugars=quick energy, lignin=structure and making enzymes, lipids=storing energy and cell membrane structure, proteins=structure only",
+    "image": "", "options": ["Row A", "Row B", "Row C", "Row D"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Row A",
+    "hint": "Simple sugars give quick energy, proteins build structures and enzymes, lipids store energy and form membranes, and lignin gives structural support only."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.1", "type": "multiple-choice",
+    "prompt": "Which pair of cells would you expect to contain the highest concentration of mitochondria within their cytoplasm?",
+    "image": "", "options": [
+      "Red blood cells and skin cells",
+      "Nerve cells and bone cells",
+      "Muscle cells and sperm cells",
+      "White blood cells and cheek cells"
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Muscle cells and sperm cells",
+    "hint": "Cells with high energy demands, like contracting muscle cells and swimming sperm cells, need many mitochondria."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "The electron microscope has had a major impact on our understanding of cell biology. One of its important contributions to that understanding has been:",
+    "image": "Paper_6_img04.png", "options": [
+      "Seeing the nucleus for the first time.",
+      "Seeing chromosomes for the first time.",
+      "Seeing ribosomes for the first time.",
+      "Seeing chloroplasts for the first time."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Seeing ribosomes for the first time.",
+    "hint": "Ribosomes are far too small to see with a light microscope, unlike the nucleus, chromosomes or chloroplasts."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.1", "type": "multiple-choice",
+    "prompt": "The bodies of multi-cellular organisms are divided into smaller and smaller units, each doing its own specific job. From the smallest to the largest units, the correct sequence is:",
+    "image": "", "options": [
+      "Molecules, organelles, cells, tissues, organs.",
+      "Organelles, molecules, tissues, cells, organs.",
+      "Molecules, cells, organelles, organs, tissues.",
+      "Organelles, cells, molecules, tissues, organs."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Molecules, organelles, cells, tissues, organs.",
+    "hint": "Each level of organisation is built from smaller units of the level before it."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.2", "type": "multiple-choice",
+    "prompt": "A major difference between a carnivore's and a herbivore's digestive system is:",
+    "image": "", "options": [
+      "The herbivore has molars while the carnivore does not.",
+      "The herbivore has a liver while the carnivore does not.",
+      "The herbivore uses microorganisms to help digest a large proportion of its food while the carnivore does not.",
+      "The herbivore cannot digest proteins."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "The herbivore uses microorganisms to help digest a large proportion of its food while the carnivore does not.",
+    "hint": "Herbivores rely on symbiotic gut microorganisms to break down cellulose in plant material."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "Eucaryotic and procaryotic cells are similar in that they both:",
+    "image": "", "options": [
+      "Contain a clearly defined nucleus.",
+      "Contain molecules of nucleic acid.",
+      "Make up the tissues of multi-cellular organisms.",
+      "Contain mitochondria."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Contain molecules of nucleic acid.",
+    "hint": "Both cell types have DNA (and RNA), even though prokaryotes lack a true nucleus and membrane-bound organelles."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.1", "type": "multiple-choice",
+    "prompt": "For a biologist to be certain that two different species of predatory birds belonged to the same family, they would most likely observe that the birds:",
+    "image": "", "options": [
+      "Were able to mate and produce fertile offspring.",
+      "Had certain structures that were similar.",
+      "Had certain behaviours that were similar.",
+      "Had the same coloured feathers."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Had certain structures that were similar.",
+    "hint": "Classification above the species level (like family) relies mainly on shared structural (anatomical) features."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.4", "type": "multiple-choice",
+    "prompt": "The image shows a fossilised fish preserved in rock. What information cannot be gained by studying this fossil?",
+    "image": "Paper_6_img07.png", "options": [
+      "The size of the animal.",
+      "The environment in which the animal lived.",
+      "The behaviour of the animal.",
+      "The relative age of the fossil compared to other fish from that area."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "The behaviour of the animal.",
+    "hint": "Fossils can reveal size, environment and relative age, but not directly how an animal behaved."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.3", "type": "multiple-choice",
+    "prompt": "What was Darwin's major contribution to Biology?",
+    "image": "", "options": [
+      "He was the first person to see variation within species of animals.",
+      "He was the first person to suggest that living things evolved over time.",
+      "He was the first person to propose a logical theory to explain the mechanism of evolution.",
+      "He was the first person to suggest that man was related to the apes."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "He was the first person to propose a logical theory to explain the mechanism of evolution.",
+    "hint": "Others had proposed evolution occurred before Darwin; his key contribution was natural selection as the mechanism."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "A map of Australia shows four areas: A (far north Queensland, tropical coast), B (central/inland desert interior), C (central east coast), and D (southern Victorian coast). Which area would you expect to see the greatest variation in temperature over a 24-hour period?",
+    "image": "Paper_6_img08.png", "options": ["A", "B", "C", "D"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "B",
+    "hint": "Dry inland/desert areas, without the moderating effect of the ocean, have the greatest day-night temperature swings."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.2", "type": "multiple-choice",
+    "prompt": "The images show four different Australian native flowers with their approximate size: Grevillea (x1/3), Orchid (x1), Banksia (x1/4), Native grass (x1/8). Which of the following correctly matches the most likely method of pollination used by each?\n\n(A) Grevillea=insect, Orchid=wind, Banksia=bird, Native grass=small mammal\n(B) Grevillea=bird, Orchid=insect, Banksia=small mammal, Native grass=wind\n(C) Grevillea=wind, Orchid=small mammal, Banksia=insect, Native grass=bird\n(D) Grevillea=bird, Orchid=insect, Banksia=wind, Native grass=small mammal",
+    "image": "Paper_6_img09.png", "options": ["Row A", "Row B", "Row C", "Row D"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Row B",
+    "hint": "Grevillea's nectar-rich tubular flowers suit birds, orchids typically rely on insects, some Banksia are pollinated by small nectar-feeding mammals, and grasses are wind-pollinated."
+  }
+]

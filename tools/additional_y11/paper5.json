@@ -1,0 +1,182 @@
+[
+  {
+    "module_id": "module-3", "inquiry_id": "3.3", "type": "multiple-choice",
+    "prompt": "Both the brahman bull and the camel carry a large proportion of their fat reserves in a hump, which allows them to more effectively lose excess heat in hot, dry environments. This is an example of:",
+    "image": "Paper_5_img01.png", "options": ["divergent evolution", "convergent evolution", "common ancestry", "adaptive radiation"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "convergent evolution",
+    "hint": "Two unrelated species independently evolving a similar trait for a similar environment is convergent evolution."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.2", "type": "multiple-choice",
+    "prompt": "Camels are able to conserve water by concentrating their urine to a much greater extent than most other mammals. This is an example of a:",
+    "image": "", "options": ["psychological adaptation", "physiological adaptation", "behavioural adaptation", "structural adaptation"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "physiological adaptation",
+    "hint": "An internal body-function adjustment like concentrating urine is a physiological adaptation."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.4", "type": "multiple-choice",
+    "prompt": "The diagram shows a rock profile with four fossil species (clam sp1, clam sp2, sea urchin, sea snail) found across four layers. Clam sp1 and sea urchin appear in the top two (most recent) layers; sea snail, sea urchin and clam sp2 appear in the third layer; clam sp2 and sea urchin appear in the bottom (oldest) layer. According to this evidence, which is the youngest fossil?",
+    "image": "Paper_5_img02.png", "options": ["Clam sp 1", "Clam sp 2", "Sea urchin", "Sea snail"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Clam sp 1",
+    "hint": "The youngest fossils are found in the uppermost layers of undisturbed rock strata."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.4", "type": "multiple-choice",
+    "prompt": "An indicator fossil is especially useful to palaeontologists: because of its short period of existence, its presence in a stratum allows that stratum to be dated with some accuracy. Using the same rock profile, which species shown is most likely to be useful as an indicator fossil?",
+    "image": "Paper_5_img02.png", "options": ["Clam sp 1", "Clam sp 2", "Sea urchin", "Sea snail"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Sea snail",
+    "hint": "The best indicator fossil is the one confined to the narrowest band of rock layers."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.2", "type": "multiple-choice",
+    "prompt": "The diagram shows a capillary passing through an organ in the human body, with oxygen diffusing into the blood and carbon dioxide diffusing out. Identify the organ.",
+    "image": "Paper_5_img03.png", "options": ["Lungs", "Heart", "Small intestine", "Active muscle"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Lungs",
+    "hint": "Blood gains oxygen and loses carbon dioxide at the site of gas exchange with air — the lungs."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.2", "type": "multiple-choice",
+    "prompt": "Letters S, T, U and V represent the chemical reactants and products in the process of photosynthesis. Choose the row which correctly identifies them.\n\n(A) S=light, T=carbon dioxide, U=energy, V=oxygen\n(B) S=carbon dioxide, T=oxygen, U=glucose, V=water\n(C) S=carbon dioxide, T=water, U=glucose, V=oxygen\n(D) S=light, T=oxygen, U=water, V=energy",
+    "image": "Paper_5_img04.png", "options": ["Row A", "Row B", "Row C", "Row D"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Row C",
+    "hint": "Photosynthesis: carbon dioxide + water -> glucose + oxygen (using light energy)."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.3", "type": "multiple-choice",
+    "prompt": "Charles Darwin collected a variety of finches from the Galapagos Islands, including the Galapagos Cactus Finch. His study of these finches had a strong influence on the development of which theory?",
+    "image": "Paper_5_img05.png", "options": [
+      "Evolution by Punctuated Equilibrium.",
+      "Evolution by Separate Creation.",
+      "Evolution by Biogeographical Isolation.",
+      "Evolution by Natural Selection."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Evolution by Natural Selection.",
+    "hint": "Darwin's finches are the classic textbook case supporting his theory of natural selection."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.2", "type": "multiple-choice",
+    "prompt": "A graph shows four lines (A, B, C, D) plotting enzyme concentration against time during the course of an enzyme-mediated reaction. Line A rises then plateaus; line B stays flat/constant; line C falls in a curve; line D falls in a straight line. Which line best shows how enzyme concentration changes during the reaction?",
+    "image": "Paper_5_img06.png", "options": ["Line A", "Line B", "Line C", "Line D"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Line B",
+    "hint": "Enzymes are catalysts — they are not used up or changed in a reaction, so their concentration stays constant."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.3", "type": "multiple-choice",
+    "prompt": "The diagram represents the human double circulatory system: vessel S runs from the heart to the lungs, T from the lungs back to the heart, U from the heart to body tissues, and V from body tissues back to the heart (with S and V being the vessels leaving the heart). Which blood vessels would have the thickest walls?",
+    "image": "Paper_5_img07.png", "options": ["S and T", "S and V", "U and V", "T and U"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "S and V",
+    "hint": "Arteries carrying blood away from the heart need thick, muscular, elastic walls to withstand high pressure."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.3", "type": "multiple-choice",
+    "prompt": "The diagram shows how the urea concentration of blood changes as it flows through organ X: blood enters with low urea and leaves with high urea. Identify organ X.",
+    "image": "Paper_5_img08.png", "options": ["Liver", "Lungs", "Kidney", "Small intestine"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Liver",
+    "hint": "The liver converts ammonia into urea, so blood leaving the liver carries more urea than blood entering it."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.4", "type": "multiple-choice",
+    "prompt": "The table below shows how much the haemoglobin of three primates differs from that of humans (number of amino acids different): Chimpanzee: 0, Gorilla: 1, Rhesus monkey: 8. Based on this evidence, which lists the primates from most closely related to humans to least closely related?",
+    "image": "", "options": [
+      "Chimpanzee, Gorilla, Rhesus monkey.",
+      "(Chimpanzee, Gorilla), Rhesus monkey.",
+      "Rhesus monkey, Gorilla, Chimpanzee.",
+      "(Rhesus monkey, Gorilla), Chimpanzee."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Chimpanzee, Gorilla, Rhesus monkey.",
+    "hint": "Fewer amino acid differences means a closer evolutionary relationship."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.4", "type": "multiple-choice",
+    "prompt": "Which one of the following assumptions underpins the interpretation of biochemical evidence, such as comparing haemoglobin amino acid sequences, for evolutionary relationships?",
+    "image": "", "options": [
+      "All organisms are biochemically the same.",
+      "Biochemical similarities between species are evidence of cross-breeding.",
+      "Biochemical similarities reflect physical similarities.",
+      "Biochemical similarities reflect genetic similarities."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Biochemical similarities reflect genetic similarities.",
+    "hint": "Biochemical evidence for evolution relies on the assumption that shared molecules reflect shared genes."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.1", "type": "multiple-choice",
+    "prompt": "The diagram shows an epidermal cell from a plant root, with a long, thin root hair extension. Which one of the following is the main function of root hairs?",
+    "image": "Paper_5_img10.png", "options": [
+      "Providing support - helping the plant to stand upright.",
+      "Providing anchorage - holding the plant in the soil.",
+      "Absorbing water - providing a large surface area.",
+      "Protection - deterring soil predators from attacking."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Absorbing water - providing a large surface area.",
+    "hint": "Root hairs greatly increase the surface area available for water and mineral absorption."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "A photomicrograph shows a stack of flattened, membrane-bound sacs within a cell. Which one of the following best describes its function?",
+    "image": "Paper_5_img11.png", "options": ["Protein synthesis", "Packaging proteins for export from the cell", "Photosynthesis", "Aerobic respiration"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Packaging proteins for export from the cell",
+    "hint": "This is the Golgi apparatus, which modifies and packages proteins for secretion."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.3", "type": "multiple-choice",
+    "prompt": "In an investigation testing the hypothesis \"the higher the air temperature, the greater the rate of transpiration\", a leafy shoot was set in a measuring cylinder of water and a student measured the volume of water transpired at five different air temperatures. What is the independent variable in this investigation?",
+    "image": "Paper_5_img12.png", "options": ["Air temperature", "Volume of water transpired", "Transpiration rate", "Time"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Air temperature",
+    "hint": "The independent variable is the one the experimenter deliberately changes."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.3", "type": "multiple-choice",
+    "prompt": "In the same transpiration investigation (testing the effect of air temperature on the rate of transpiration), which one of the following variables would most need to be controlled?",
+    "image": "", "options": ["Air temperature", "Volume of water transpired", "Same measuring cylinder", "Air humidity"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Air humidity",
+    "hint": "Humidity also affects transpiration rate, so it must be kept constant to isolate the effect of temperature."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.3", "type": "multiple-choice",
+    "prompt": "In the transpiration investigation, the volume of water transpired rose steadily as air temperature increased from 15C to 35C. The results of the experiment:",
+    "image": "", "options": ["support the hypothesis.", "prove the hypothesis.", "contradict the hypothesis.", "suggest that the hypothesis should be modified."],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "support the hypothesis.",
+    "hint": "Consistent results in the predicted direction support a hypothesis; science doesn't 'prove' hypotheses outright."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "The six-plated barnacle (Chthamalus antennatus) is common on NSW rocky shores, forming a distinct band on the upper shore. Its upper limit is determined by its ability to avoid drying out (exposure to sun and time out of water); its lower limit is determined by the presence of predators and competitors. Choose the row which best expresses the factors determining its upper and lower limits.\n\n(A) Upper: biotic, Lower: biotic\n(B) Upper: abiotic, Lower: abiotic\n(C) Upper: biotic, Lower: abiotic\n(D) Upper: abiotic, Lower: biotic",
+    "image": "", "options": ["Row A", "Row B", "Row C", "Row D"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Row D",
+    "hint": "Desiccation from sun/air exposure is an abiotic factor; predators and competitors are biotic factors."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.2", "type": "multiple-choice",
+    "prompt": "Poisons like mercury interfere with enzyme function by partially blocking the active site. A graph plots enzyme activity against mercury concentration for four options: (A) a flat line, (B) a bell-shaped curve that rises then falls, (C) a curve that steadily decreases, (D) a curve that steadily increases. Which graph would you expect to best represent the relationship between mercury concentration and enzyme activity?",
+    "image": "Paper_5_img13.png", "options": ["Graph A", "Graph B", "Graph C", "Graph D"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Graph C",
+    "hint": "As an inhibitor's concentration rises, it blocks more active sites, so enzyme activity should steadily fall."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.2", "type": "multiple-choice",
+    "prompt": "The diagram shows the human digestive system with four labelled parts (A: mouth/oesophagus region, B: stomach, C: start of the large intestine, D: the coiled small intestine). Which part is the main site of glucose absorption?",
+    "image": "Paper_5_img14.png", "options": ["A", "B", "C", "D"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "D",
+    "hint": "Glucose from digested carbohydrates is absorbed mainly across the wall of the small intestine."
+  }
+]

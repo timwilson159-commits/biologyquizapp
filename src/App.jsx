@@ -2679,7 +2679,7 @@ function AdminPanel({ questions, questionsApi, users, usersApi, flagsApi, onBack
       </div>
 
       {tab === "questions" && <AdminQuestions questions={questions} questionsApi={questionsApi} />}
-      {tab === "flags" && <AdminFlags flagsApi={flagsApi} questions={questions} questionsApi={questionsApi} />}
+      {tab === "flags" && <AdminFlags flagsApi={flagsApi} questions={questions} questionsApi={questionsApi} users={users} />}
       {tab === "students" && <AdminStudents users={users} usersApi={usersApi} />}
       {tab === "progress" && <AdminProgress users={users} />}
 
@@ -2862,10 +2862,11 @@ function AdminQuestions({ questions, questionsApi }) {
   );
 }
 
-function AdminFlags({ flagsApi, questions, questionsApi }) {
+function AdminFlags({ flagsApi, questions, questionsApi, users }) {
   const [editing, setEditing] = useState(null);
   const unresolved = flagsApi.flags.filter(f => !f.resolved);
   const questionById = id => questions.find(q => q.id === id);
+  const flaggedByName = code => users[code]?.name ? `${users[code].name} (${code})` : code;
 
   return (
     <div>
@@ -2882,7 +2883,7 @@ function AdminFlags({ flagsApi, questions, questionsApi }) {
               <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 300px" }}>
                   <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 600 }}>{q ? q.prompt : "(question deleted)"}</p>
-                  <p style={{ margin: "0 0 4px", fontSize: 12, color: "#888" }}>Flagged by {f.user_code} · {new Date(f.created_at).toLocaleString()}</p>
+                  <p style={{ margin: "0 0 4px", fontSize: 12, color: "#888" }}>Flagged by {flaggedByName(f.user_code)} · {new Date(f.created_at).toLocaleString()}</p>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {f.reasons.map(r => {
                       const reason = FLAG_REASONS.find(fr => fr.id === r);
@@ -3066,6 +3067,20 @@ function AdminStudents({ users, usersApi }) {
             Remove Selected ({selected.length})
           </button>
         )}
+        {classFilter !== "all" && (
+          <button style={{ ...S.btn, ...S.btnDanger }}
+            onClick={() => {
+              const classCodes = filteredCodes;
+              if (classCodes.length === 0) return;
+              const typed = prompt(`This permanently deletes all ${classCodes.length} student(s) in "${classFilter}" and their entire quiz history. This cannot be undone.\n\nType the class name to confirm:`);
+              if (typed !== classFilter) { if (typed !== null) alert("Class name didn't match — nothing was deleted."); return; }
+              usersApi.removeUsersBulk(classCodes);
+              setSelected(p => p.filter(c => !classCodes.includes(c)));
+              setClassFilter("all");
+            }}>
+            🗑️ Delete Class "{classFilter}" ({filteredCodes.length})
+          </button>
+        )}
       </div>
 
       <div style={{ overflowX: "auto" }}>
@@ -3206,24 +3221,6 @@ function AdminProgress({ users }) {
         )}
       </div>
 
-      {classFilter !== "all" && leaderboard && (
-        <div style={{ ...S.card, marginBottom: "1.25rem" }}>
-          <h3 style={{ ...S.h3, marginBottom: 10 }}>🏆 {classFilter} Leaderboard</h3>
-          {leaderboard.length === 0 ? (
-            <p style={{ color: "#aaa", margin: 0, fontSize: 13.5 }}>No students in this class yet.</p>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {leaderboard.map(r => (
-                <div key={r.code} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 4px", borderBottom: `1px solid ${C.lineSoft}` }}>
-                  <span style={{ fontSize: 13.5 }}><b style={{ color: C.muted, marginRight: 8 }}>#{r.rank}</b>{r.name} <span style={{ color: "#aaa" }}>({r.code})</span></span>
-                  <span style={{ fontWeight: 800, color: C.brandDeep }}>{r.correct} correct</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
       {loading && <p style={{ color: "#888" }}>Loading...</p>}
       {!loading && (
         <div style={{ overflowX: "auto" }}>
@@ -3253,6 +3250,24 @@ function AdminProgress({ users }) {
               {rows.length === 0 && <tr><td style={S.td} colSpan={5}><span style={{ color: "#aaa" }}>No students match this filter.</span></td></tr>}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {classFilter !== "all" && leaderboard && (
+        <div style={{ ...S.card, marginTop: "1.25rem" }}>
+          <h3 style={{ ...S.h3, marginBottom: 10 }}>🏆 {classFilter} Leaderboard</h3>
+          {leaderboard.length === 0 ? (
+            <p style={{ color: "#aaa", margin: 0, fontSize: 13.5 }}>No students in this class yet.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {leaderboard.map(r => (
+                <div key={r.code} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 4px", borderBottom: `1px solid ${C.lineSoft}` }}>
+                  <span style={{ fontSize: 13.5 }}><b style={{ color: C.muted, marginRight: 8 }}>#{r.rank}</b>{r.name} <span style={{ color: "#aaa" }}>({r.code})</span></span>
+                  <span style={{ fontWeight: 800, color: C.brandDeep }}>{r.correct} correct</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1,0 +1,110 @@
+[
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "Which of the following organisms would you best be able to measure the abundance of using random quadrats?",
+    "image": "", "options": ["Marsupial mice", "Foxes", "A particular species of ants", "A particular species of grass"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "A particular species of grass",
+    "hint": "Quadrats work best for stationary, evenly-distributed organisms like plants, not mobile animals."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "The diagram shows a food web from a Mountain Ash (Eucalypt) forest: trees are eaten by spiders, beetles, termites and ants; beetles are also eaten by antechinus and sugar gliders; spiders are eaten by sugar gliders; termites and ants are eaten by echidnas. What do the arrows in the food web indicate?",
+    "image": "Paper_4_img01.png", "options": [
+      "The direction of movement of energy and matter.",
+      "The direction of movement of light energy and matter.",
+      "An evolutionary relationship between species.",
+      "The species that are competing for resources in the community."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "The direction of movement of energy and matter.",
+    "hint": "Food web arrows always show the direction energy and matter flow, from eaten to eater."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "In the Mountain Ash forest food web, the spider feeds on trees and is fed on by sugar gliders. In terms of interactions in the food web, what term would best describe the spider?",
+    "image": "Paper_4_img01.png", "options": ["Producer", "Animal", "Herbivore", "Carnivore"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Herbivore",
+    "hint": "In this food web the spider is shown feeding directly on the tree, making it a primary consumer."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "In the Mountain Ash forest food web (trees, spiders, beetles, termites, ants, antechinus, sugar gliders, echidnas), which of the organisms would be classified as producers?",
+    "image": "Paper_4_img01.png", "options": ["Beetles", "Spiders", "Termites", "Trees"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Trees",
+    "hint": "Producers make their own food — only the trees do that here."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "To which scientist is the discovery of the nucleus inside cells attributed?",
+    "image": "", "options": ["Robert Brown", "Robert Hooke", "Anton van Leeuwenhoek", "Rudolf Virchow"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Robert Brown",
+    "hint": "Robert Brown first described the cell nucleus in 1831, while examining orchid cells."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.2", "type": "multiple-choice",
+    "prompt": "Which of the following correctly matches all three groups of substances with their uses?",
+    "image": "", "options": [
+      "Proteins: used as stores of energy. Carbohydrates: form part of membranes. Lipids: growth and repair of cells.",
+      "Proteins: waterproof coatings on leaves. Carbohydrates: used as stores of energy. Lipids: important source of energy.",
+      "Proteins: important source of energy. Carbohydrates: growth and repair of cells. Lipids: used as stores of energy.",
+      "Proteins: growth and repair of cells. Carbohydrates: important source of energy. Lipids: used as stores of energy."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Proteins: growth and repair of cells. Carbohydrates: important source of energy. Lipids: used as stores of energy.",
+    "hint": "Proteins build/repair tissue, carbohydrates are the body's quick energy source, lipids are long-term energy storage."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.2", "type": "multiple-choice",
+    "prompt": "The diagram below shows the digestive system of a species of mammal: a short oesophagus and stomach leading to a long, coiled small intestine, then a prominent caecum before a short large intestine. What type of mammal would most probably have this type of digestive system?",
+    "image": "Paper_4_img02.png", "options": ["Herbivore", "Carnivore", "Producer", "Decomposer"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Herbivore",
+    "hint": "A large caecum houses the microorganisms herbivores rely on to digest cellulose."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.3", "type": "multiple-choice",
+    "prompt": "A student observing a plant tissue wrote: \"The tissue consists of cells with thick walls. I cannot see any cell contents, nor any cross walls. The cells appear to form a continuous system of tubes when viewed in longitudinal section.\" What tissue would this most probably be?",
+    "image": "", "options": ["Xylem", "Epidermis", "Phloem", "Root hair cells"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Xylem",
+    "hint": "Dead, thick-walled cells joined end to end into continuous hollow tubes describe xylem vessels."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.1", "type": "multiple-choice",
+    "prompt": "A scientist has discovered a new species of plant and has classified it as Banksia spottidii. Which other plant species would be most closely related to it?",
+    "image": "", "options": ["Eucalyptus spottidii", "Spottidii banksiensis", "Banksia longifolia", "Eucalyptus banksia"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Banksia longifolia",
+    "hint": "Species sharing the same genus name (Banksia) are the most closely related."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "What is one way in which prokaryotic organisms are different from eukaryotic organisms?",
+    "image": "", "options": [
+      "They lack membrane-bound organelles.",
+      "They have a nucleus.",
+      "They contain more than one membrane-bound nucleus.",
+      "They are all photosynthetic organisms."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "They lack membrane-bound organelles.",
+    "hint": "The defining feature of prokaryotes is the absence of a nucleus and other membrane-bound organelles."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.2", "type": "multiple-choice",
+    "prompt": "What is Glossopteris?",
+    "image": "", "options": [
+      "An animal found only in Tasmania.",
+      "Evidence that North America was once joined to Asia.",
+      "A fossil plant found only in rocks in Africa, showing that Africa separated from Gondwana at an early time.",
+      "A fossil plant found in rocks in all of the Southern continents, showing they were once all joined."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "A fossil plant found in rocks in all of the Southern continents, showing they were once all joined.",
+    "hint": "Glossopteris fossils across the southern continents are classic evidence for Gondwana."
+  }
+]

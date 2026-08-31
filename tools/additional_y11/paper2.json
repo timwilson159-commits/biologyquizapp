@@ -1,0 +1,198 @@
+[
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "Biology students measured the oxygen content of the water in a fish tank in a school classroom. The fish tank contained five goldfish and several water plants. What are the results obtained for the oxygen content of the fish tank an example of?",
+    "image": "", "options": [
+      "Biotic characteristics of an aquatic environment",
+      "Abiotic characteristics of an aquatic environment",
+      "Biotic and abiotic characteristics related to the entire classroom",
+      "Abiotic characteristics of a terrestrial environment"
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Abiotic characteristics of an aquatic environment",
+    "hint": "Dissolved oxygen is a non-living, physical/chemical property of the water."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "A small plant lives in the bush in an ecosystem dominated by gum trees. This plant needs moisture, oxygen, carbon dioxide, light and a variety of minerals to survive in this habitat. What does this indicate the small plant depends on for its survival?",
+    "image": "", "options": [
+      "Biotic characteristics",
+      "A relationship with a number of gum trees",
+      "A relationship with the ecosystem's herbivores",
+      "Abiotic factors"
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Abiotic factors",
+    "hint": "Moisture, gases, light and minerals are all non-living components of the environment."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.2", "type": "multiple-choice",
+    "prompt": "Choose the alternative that summarises some of the aspects of both respiration and photosynthesis.",
+    "image": "", "options": [
+      "Photosynthesis absorbs CO2, respiration absorbs O2",
+      "Photosynthesis absorbs CO2, respiration releases O2",
+      "Photosynthesis absorbs O2, respiration absorbs CO2",
+      "Photosynthesis releases O2, respiration absorbs CO2"
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Photosynthesis absorbs CO2, respiration absorbs O2",
+    "hint": "Photosynthesis takes in carbon dioxide; respiration takes in oxygen."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "A ringtail possum native to the Sydney area lives in bottlebrush trees. It feeds on the flowers of these trees and sometimes lives amongst their leaves and branches. The trees are not damaged by the possums, but their droppings encourage the growth of the roots of the tree. What is the name of the relationship between the bottlebrush and the possum?",
+    "image": "", "options": ["Mutualism", "Parasitism", "Commensalism", "Allelopathy"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Mutualism",
+    "hint": "Both species benefit here: the possum gets food and shelter, the tree gets fertilised roots."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "The food web shows: grass is eaten by grasshoppers and mice; grasshoppers are eaten by lizards and snakes; mice and lizards are eaten by snakes; snakes are eaten by eagles (the eagle's only food source shown). Which population would be most affected if the snakes were removed from this food web?",
+    "image": "Paper_2_img01.png", "options": ["Grass", "Mice", "Lizard", "Eagle"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Eagle",
+    "hint": "In this food web, the eagle's only food source shown is the snake, so losing snakes would hit the eagle population hardest."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "Which one of the following cell structures is visible using an electron microscope but not visible using a light microscope?",
+    "image": "", "options": ["Chloroplast", "Nucleolus", "Ribosome", "Cell wall"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Ribosome",
+    "hint": "Ribosomes are far too small to resolve with a light microscope."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "Which one of the following most accurately describes a cell membrane?",
+    "image": "", "options": [
+      "Permeable to some molecules and impermeable to others",
+      "Permeable to only larger molecules",
+      "Impermeable to all molecules",
+      "Permeable to all molecules"
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Permeable to some molecules and impermeable to others",
+    "hint": "This describes selective (differential) permeability."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.2", "type": "multiple-choice",
+    "prompt": "The same type of molecule is present in Area A and Area B, separated by a membrane. After several hours, tests showed that some molecules had moved from Area A to Area B, from a region of higher concentration to lower concentration, with no energy input by the cell. What process is responsible for this movement?",
+    "image": "Paper_2_img02.png", "options": ["Phagocytosis", "General cellular activity", "Diffusion", "Osmosis"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Diffusion",
+    "hint": "Movement of a solute down its concentration gradient, without energy input, is diffusion."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.1", "type": "multiple-choice",
+    "prompt": "Two plant roots are compared: root A has a smooth surface, while root B is covered in fine root hairs. The plant with root B has a greater advantage in absorbing water from the soil. What is the reason for this?",
+    "image": "Paper_2_img03.png", "options": [
+      "The abundance of root hairs ensures that it is more strongly anchored in the soil.",
+      "Soil organisms are able to carry water into the spaces around the root hairs.",
+      "The greater surface area to volume ratio provided by the root hairs means water is more readily absorbed.",
+      "Root A acts as an impermeable epidermis which prevents water from entering the root."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "The greater surface area to volume ratio provided by the root hairs means water is more readily absorbed.",
+    "hint": "Root hairs are a classic example of increasing surface area for absorption."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.2", "type": "multiple-choice",
+    "prompt": "Trees transform light energy from the sun into chemical energy that can be used by members of an ecosystem. Fungi contain enzymes that break down this chemical energy into a form they can use to fuel their life processes. Choose the alternative that correctly classifies both trees and fungi.",
+    "image": "", "options": [
+      "Trees: heterotrophs. Fungi: autotrophs.",
+      "Trees: autotrophs. Fungi: heterotrophs.",
+      "Trees: autotrophs. Fungi: autotrophs.",
+      "Trees: heterotrophs. Fungi: heterotrophs."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Trees: autotrophs. Fungi: heterotrophs.",
+    "hint": "Trees make their own food via photosynthesis; fungi must break down existing organic matter."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.1", "type": "multiple-choice",
+    "prompt": "The horse is classified as Kingdom: Animalia, Phylum: Chordata, Class: Mammalia, Order: Perissodactyla, Family: Equidae, Genus: Equus, Species: caballus. All organisms are given a binomial scientific name. What would be the binomial scientific name for the horse?",
+    "image": "", "options": ["Animalia chordata", "Equus caballus", "Equidae Equus", "Mammalia Animalia"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Equus caballus",
+    "hint": "Binomial names combine the genus and species."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.2", "type": "multiple-choice",
+    "prompt": "The lilly pilly tree, native to coastal northern Australia, produces fleshy, edible fruit. How does the fleshy, edible fruit of the lilly pilly assist the survival of these plants?",
+    "image": "Paper_2_img05.png", "options": [
+      "It provides nourishment for herbivores.",
+      "It provides a mechanism for pollination.",
+      "It provides a mechanism for germination.",
+      "It provides a mechanism for seed dispersal."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "It provides a mechanism for seed dispersal.",
+    "hint": "Animals eat the fruit and later deposit the seeds elsewhere."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.2", "type": "multiple-choice",
+    "prompt": "Parts of Antarctica contain fossils of vegetation similar to today's endemic Tasmanian flora. Fossils of whales, molluscs and other invertebrates have been found in Antarctica's Vestfold Hills, and older plant fossils near the South Pole. What is a valid conclusion from this information?",
+    "image": "", "options": [
+      "Tasmania was once at the South Pole.",
+      "Tasmania was once covered in a thick ice sheet similar to Antarctica's.",
+      "Tasmania was once joined to Antarctica.",
+      "Tasmania and Antarctica were both at the equator at one time."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Tasmania was once joined to Antarctica.",
+    "hint": "Similar fossils on both landmasses is classic evidence for the break-up of Gondwana."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.2", "type": "multiple-choice",
+    "prompt": "A graph shows changes in the relative area covered by different vegetation types in Australia over the last 22 million years, as the continent drifted north and dried out. Which statement is a valid conclusion based on this information?",
+    "image": "Paper_2_img06.png", "options": [
+      "The area of fire-tolerant woody sclerophyll has increased over time.",
+      "As Australia moved north, the climate in the northern part became more tropical.",
+      "The area of rainforest has increased over time.",
+      "The frequency of fire has been the dominant factor in the change in relative abundance of Australian species."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "The area of fire-tolerant woody sclerophyll has increased over time.",
+    "hint": "As Australia dried out, rainforest contracted and sclerophyll vegetation expanded."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.1", "type": "multiple-choice",
+    "prompt": "The clouded leopard of Borneo was long believed to be the same species as the clouded leopard of mainland Southeast Asia. Genetic tests later revealed it to be a unique species, having diverged from the mainland population around 1.4 million years ago. Why was the Borneo clouded leopard, once considered the same species as the mainland leopards, now described as a new species?",
+    "image": "", "options": [
+      "Mutations have occurred since they were first classified, and they have changed.",
+      "Classification is arbitrary and depends on the biologist as to how it is classified.",
+      "New technology enabled previously unknown differences to be found.",
+      "Biologists had previously used behavioural features to classify the leopards of Southeast Asia."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "New technology enabled previously unknown differences to be found.",
+    "hint": "Genetic testing technology revealed differences that weren't visible before."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "During a first-hand investigation to identify starch in plant tissues, choose the alternative that correctly names the indicator used and the positive test result for it.",
+    "image": "", "options": [
+      "Dilute iodine solution: changes from brown to red",
+      "Dilute iodine solution: changes from brown to blue/black",
+      "Benedict's solution: forms an orange/red precipitate",
+      "Benedict's solution: changes from brown to blue/black"
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Dilute iodine solution: changes from brown to blue/black",
+    "hint": "Iodine solution is the standard test for starch, turning from brown to blue-black in its presence."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.3", "type": "multiple-choice",
+    "prompt": "Over the millennia, at least 40 genetic differences emerged between the Borneo and mainland clouded leopard populations. What is the best explanation for this?",
+    "image": "", "options": [
+      "The two species were genetically isolated from each other by water.",
+      "The two species were different in appearance and so did not mate with each other.",
+      "Earthquakes made Borneo and Sumatra move away from mainland Southeast Asia so the two species could no longer interact.",
+      "Environmental changes made the two species evolve differently."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "The two species were genetically isolated from each other by water.",
+    "hint": "Geographic (water) isolation prevents gene flow between populations, allowing them to diverge."
+  }
+]

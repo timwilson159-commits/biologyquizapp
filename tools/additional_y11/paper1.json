@@ -1,0 +1,132 @@
+[
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "The four alternatives below describe examples of relationships in an ecosystem. Which of these describes an example of allelopathy?",
+    "image": "", "options": [
+      "Ticks obtain nourishment by sucking blood from the skin of hosts.",
+      "Seedlings of alpine ash, Eucalyptus delegatensis, have their growth inhibited by chemicals produced by tussock grass.",
+      "A lichen consists of a fungus which provides an environment in which an alga can live, and the alga provides food for the fungus.",
+      "Ferns such as staghorns living in dense rainforests obtain sufficient sunlight by growing high up on the trunks of trees."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Seedlings of alpine ash, Eucalyptus delegatensis, have their growth inhibited by chemicals produced by tussock grass.",
+    "hint": "Allelopathy is when one plant releases chemicals that inhibit the growth of another plant nearby."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.2", "type": "multiple-choice",
+    "prompt": "What is the correct role of both photosynthesis and respiration in ecosystems?",
+    "image": "", "options": [
+      "Photosynthesis: energy from sunlight is used to combine carbon dioxide and hydrogen from sugars to make water and oxygen. Respiration: cells obtain energy from the breakdown of complex molecules to drive metabolic processes.",
+      "Photosynthesis: energy from sunlight is used to combine sugars and oxygen to make carbon dioxide and water. Respiration: cells obtain energy from the breakdown of simple molecules to produce complex molecules.",
+      "Photosynthesis: cells obtain energy from the breakdown of complex molecules to drive metabolic processes. Respiration: energy from sunlight is used to combine carbon dioxide and hydrogen from water to make sugars and oxygen.",
+      "Photosynthesis: energy from sunlight is used to combine carbon dioxide and hydrogen from water to make sugars and oxygen. Respiration: cells obtain energy from the breakdown of complex molecules to drive metabolic processes."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Photosynthesis: energy from sunlight is used to combine carbon dioxide and hydrogen from water to make sugars and oxygen. Respiration: cells obtain energy from the breakdown of complex molecules to drive metabolic processes.",
+    "hint": "Photosynthesis builds sugars from CO2 and water using light energy; respiration breaks complex molecules down to release energy."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "The alternatives below contain lists of cell organelles. Which alternative contains only organelles easily visible with the aid of a light microscope?",
+    "image": "", "options": [
+      "Chloroplasts, mitochondria, lysosomes, nucleus.",
+      "Chloroplasts, ribosomes, lysosomes, nucleus.",
+      "Vacuoles, chloroplasts, nucleus, cell wall.",
+      "Mitochondria, chloroplasts, nucleus, cell wall."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Vacuoles, chloroplasts, nucleus, cell wall.",
+    "hint": "Mitochondria, ribosomes and lysosomes are all too small to resolve clearly with a light microscope."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.2", "type": "multiple-choice",
+    "prompt": "The diagram below shows a cross-section of a typical leaf. Which alternative gives the correct relationship between the position of the named tissue and its function?",
+    "image": "Paper_1_img01.png", "options": [
+      "Spongy mesophyll: arranged in a loosely packed layer above the lower epidermis to absorb as much sunlight as possible.",
+      "Epidermis: covers the outside of the leaf to absorb as much oxygen and carbon dioxide as possible.",
+      "Palisade mesophyll: arranged in a tightly packed layer under the upper epidermis to absorb as much sunlight as possible.",
+      "Cuticle: covers the upper epidermis to prevent water loss from the midrib."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Palisade mesophyll: arranged in a tightly packed layer under the upper epidermis to absorb as much sunlight as possible.",
+    "hint": "The palisade layer sits just under the upper epidermis, packed with chloroplasts to capture light."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.2", "type": "multiple-choice",
+    "prompt": "The diagrams show a frog and an insect. What are their respective gaseous exchange surfaces?",
+    "image": "Paper_1_img02.png", "options": [
+      "Frog: lungs only. Insect: lungs only.",
+      "Frog: moist skin and lungs. Insect: tracheae.",
+      "Frog: tracheae and lungs. Insect: moist skin and lungs.",
+      "Frog: gills and moist skin. Insect: lungs only."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Frog: moist skin and lungs. Insect: tracheae.",
+    "hint": "Frogs exchange gas across moist skin as well as lungs; insects use a tracheal system, not lungs."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.1", "type": "multiple-choice",
+    "prompt": "The diagram shows a dichotomous key used to identify Banksia species from their adult leaves.\n\n1a Leaves small and narrow, 1-1.5 cm long -> Banksia ericifolia\n1b Leaves 2-16 cm long\n2a Leaves 2-10 cm long, white on undersurface\n2b Leaves 8-16 cm long, lighter but not white on undersurface; margins distinctly and evenly serrated -> Banksia serrata\n3a Leaves less than 1 cm wide -> Banksia marginata\n3b Leaves generally 1-2 cm wide\n4a Adult leaves with smooth margins, juvenile leaves toothed -> Banksia integrifolia\n4b Leaves irregularly toothed; young shoots with a covering of rusty hairs -> Banksia ericifolia\n\nUsing the key on the leaf shown, which species does it belong to?",
+    "image": "Paper_1_img03.png", "options": [
+      "Banksia ericifolia",
+      "Banksia serrata",
+      "Banksia asplenifolia",
+      "Banksia integrifolia"
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Banksia integrifolia",
+    "hint": "Follow the key: is the leaf 1-2 cm wide with smooth adult margins?"
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.4", "type": "multiple-choice",
+    "prompt": "Which of the following represents a difficulty experienced in classifying extinct organisms?",
+    "image": "", "options": [
+      "The fossil evidence may be incomplete.",
+      "Scientists can name extinct organisms even if they only have part of the organism.",
+      "Classifying extinct organisms helps us work out relationships between organisms.",
+      "Scientists can never use a key to classify extinct organisms."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "The fossil evidence may be incomplete.",
+    "hint": "Think about what limits our ability to classify a species from fossils alone."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.3", "type": "multiple-choice",
+    "prompt": "The diagram shows two different colour forms of the one species, Epacris impressa. What is the main consequence of variation within a species?",
+    "image": "Paper_1_img04.png", "options": [
+      "One form of the species will always take over from the other form.",
+      "The species has a lower chance of survival when there are environmental changes.",
+      "There is a chance that some members of the species will survive when there are environmental changes.",
+      "Those organisms that survive and reproduce are well adapted to the environment."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "There is a chance that some members of the species will survive when there are environmental changes.",
+    "hint": "Variation within a population increases the chance that some individuals can cope with a changing environment."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.3", "type": "multiple-choice",
+    "prompt": "During your study of Biology you presented information from secondary sources to discuss the Huxley-Wilberforce debate. What was this debate about?",
+    "image": "", "options": [
+      "The cell theory.",
+      "Darwin's theory of evolution.",
+      "Evolutionary relationships between extinct species.",
+      "The origin of life on Earth."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Darwin's theory of evolution.",
+    "hint": "This famous 1860 Oxford debate followed the publication of On the Origin of Species."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.2", "type": "multiple-choice",
+    "prompt": "The fossil evidence concerning changes in distribution and abundance of Australia's species shows two main factors that have contributed to these changes. Which alternative gives the correct factor with a correct description of it?",
+    "image": "", "options": [
+      "Climate change: decreasing temperature and a decline in the availability of water are shown in the increase of rainforests and woodland.",
+      "Human impact: the use of fire by Aboriginal people may have changed the environment, and hunting practices led to the extinction of megafauna.",
+      "Climate change: increasing temperature and an increase in the availability of water are shown in the increase of grassland and woodland.",
+      "Human impact: the use of fire by Aboriginal people may have maintained the environment, and hunting practices are not thought to have had any real impact on megafauna."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Human impact: the use of fire by Aboriginal people may have changed the environment, and hunting practices led to the extinction of megafauna.",
+    "hint": "Consider the two competing explanations for Australian megafauna decline: climate vs human activity."
+  }
+]

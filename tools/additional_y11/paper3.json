@@ -1,0 +1,171 @@
+[
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "Which technology is used to determine a cell's structure and function to the highest resolution?",
+    "image": "", "options": ["EMI microscope", "Stereo microscope", "Electron microscope", "Monocular microscope"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Electron microscope",
+    "hint": "Electron microscopes have far greater resolving power than any light microscope."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.1", "type": "multiple-choice",
+    "prompt": "Which is the correct hierarchical structural organisation within an organism?",
+    "image": "", "options": [
+      "Organelles -> cells -> tissues -> organs -> systems",
+      "Organelles -> organs -> tissues -> cells -> systems",
+      "Organelles -> tissues -> organs -> cells -> systems",
+      "Organelles -> cells -> systems -> tissues -> organs"
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Organelles -> cells -> tissues -> organs -> systems",
+    "hint": "Each level is built from smaller units of the previous level."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.4", "type": "multiple-choice",
+    "prompt": "The wing of the bat, the flipper of the whale, the leg of a horse and the arm of a human are all skeletal variations of the same underlying bones: phalanges, metacarpals, carpals, radius, ulna and humerus. In what category of evolutionary evidence would this information be classified?",
+    "image": "", "options": ["Biogeography", "Comparative anatomy", "Biochemical evidence", "Comparative embryology"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Comparative anatomy",
+    "hint": "These are homologous structures — same underlying bone plan, different function."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "Which of the following is an abiotic factor in an ecosystem?",
+    "image": "", "options": ["Predation", "Temperature", "Competition", "Symbiotic relationships"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Temperature",
+    "hint": "Abiotic factors are non-living components of the environment."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.3", "type": "multiple-choice",
+    "prompt": "As blood is transported past different organs, its composition changes. Which row correctly identifies these changes?\n\nA. Lungs: increase O2/decrease CO2. Muscles: increase O2/increase CO2. Large intestine: increase H2O, Cl- and vitamins. Small intestine: decrease glucose and amino acids.\nB. Lungs: decrease O2/increase CO2. Muscles: increase O2/decrease CO2. Large intestine: decrease H2O, Cl- and vitamins. Small intestine: decrease glucose and amino acids.\nC. Lungs: increase O2/decrease CO2. Muscles: decrease O2/decrease CO2. Large intestine: decrease H2O, Cl- and vitamins. Small intestine: decrease glucose and amino acids.\nD. Lungs: increase O2/decrease CO2. Muscles: decrease O2/increase CO2. Large intestine: increase H2O, Cl- and vitamins. Small intestine: increase glucose and amino acids.",
+    "image": "", "options": ["Row A", "Row B", "Row C", "Row D"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Row D",
+    "hint": "Blood gains O2 and loses CO2 at the lungs, loses O2 and gains CO2 at active muscles, and gains reabsorbed water/electrolytes at the large intestine and nutrients at the small intestine."
+  },
+  {
+    "module_id": "module-2", "inquiry_id": "2.3", "type": "multiple-choice",
+    "prompt": "In living organisms, what system consists of the following components: xylem, phloem, arteries and veins?",
+    "image": "", "options": [
+      "Vascular system of autotrophs",
+      "Cardiovascular system of heterotrophs",
+      "Vascular system of heterotrophs and autotrophs",
+      "Cardiovascular system of autotrophs and heterotrophs"
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Vascular system of heterotrophs and autotrophs",
+    "hint": "\"Vascular\" is the general term covering plant transport tissue (xylem/phloem) and animal blood vessels."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "Which of the following is NOT a sampling technique used to measure populations of organisms?",
+    "image": "", "options": ["Purpose sampling", "Quadrat sampling", "Transect sampling", "Capture-recapture sampling"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Purpose sampling",
+    "hint": "Quadrats, transects and capture-recapture are all standard ecological sampling techniques."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.3", "type": "multiple-choice",
+    "prompt": "Galapagos marine iguanas differ from their mainland ancestors: they eat sea algae rather than tree and shrub vegetation, and have shorter noses, darker skin, and salt-excreting glands. They have changed and adapted due to isolation from their mainland ancestors. Of which form of evolution are the iguanas an example?",
+    "image": "", "options": ["Microevolution", "Macroevolution", "Divergent evolution", "Convergent evolution"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Divergent evolution",
+    "hint": "A single ancestral population splitting and evolving differently after isolation is divergent evolution."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "Whale lice live on a whale, eating algae and dead skin cells, and gain free transport and protection. Scientists found that the lice's presence in wounds reduces infection, and the whale exposes areas with more lice to predators as a form of armour. What is the symbiotic relationship between the whale and the whale louse?",
+    "image": "", "options": ["Predation", "Parasitism", "Mutualism", "Endosymbiont"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Mutualism",
+    "hint": "Both organisms benefit here — food/transport for the lice, wound protection for the whale."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.3", "type": "multiple-choice",
+    "prompt": "The SARS-CoV-2 virus has had many variants, each a mutation of the original virus arising during replication. What is COVID-19 and its variants, such as Omicron and Delta, modern day examples of?",
+    "image": "", "options": ["DNA synthesis", "Species diversity", "Evolutionary change", "Biochemical sequencing"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Evolutionary change",
+    "hint": "Mutation producing new variants over time is evolutionary change in action."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.3", "type": "multiple-choice",
+    "prompt": "Which best describes the difference between punctuated equilibrium and the (gradualist) process of natural selection?",
+    "image": "", "options": [
+      "Punctuated equilibrium is fast but constant change over time, whereas natural selection is a rapid burst of change of organisms over time.",
+      "Punctuated equilibrium is a slow and constant change over time, whereas natural selection is the slow and inconstant change of organisms over time.",
+      "Punctuated equilibrium occurs as a rapid burst of change followed by periods of gradual change, whereas natural selection is the slow change of organisms over time.",
+      "Punctuated equilibrium occurs as a rapid burst of change followed by periods of stability, whereas natural selection is the gradual and constant change of organisms over time."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Punctuated equilibrium occurs as a rapid burst of change followed by periods of stability, whereas natural selection is the gradual and constant change of organisms over time.",
+    "hint": "Punctuated equilibrium models evolution as short bursts of rapid change followed by long stable periods."
+  },
+  {
+    "module_id": "module-1", "inquiry_id": "1.1", "type": "multiple-choice",
+    "prompt": "Stromatolites are layered sedimentary structures formed by a collection of photosynthetic microorganisms working together as interdependent organisms to survive. What is the most correct classification of the arrangement of cells in a stromatolite?",
+    "image": "", "options": ["Settler", "Colonial", "Unicellular", "Multicellular"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Colonial",
+    "hint": "Independent single cells living and working together, but not truly fused into one organism, is a colonial arrangement."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.2", "type": "multiple-choice",
+    "prompt": "Which is NOT a piece of palaeontological or geological evidence that can be used to provide evidence for past changes in ecosystems?",
+    "image": "", "options": ["Ice core drilling", "Aboriginal rock paintings", "Rock structure and formation", "Atmospheric barometric pressures"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Atmospheric barometric pressures",
+    "hint": "Ice cores, rock art and rock strata all record long-term environmental history; current barometric pressure does not."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.1", "type": "multiple-choice",
+    "prompt": "If a predator population becomes extinct or is eliminated from an environment, what would most likely happen to the prey species?",
+    "image": "", "options": [
+      "The prey population would increase.",
+      "The prey population would decrease.",
+      "A 'trophic cascade' would see the initial increase in prey numbers, followed by a decrease as their food source is depleted.",
+      "The prey population would remain in a state of flux as a new predator-prey relationship is initiated and ecological balances are maintained."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "A 'trophic cascade' would see the initial increase in prey numbers, followed by a decrease as their food source is depleted.",
+    "hint": "Removing a predator often triggers a chain reaction through the food web — a trophic cascade."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.2", "type": "multiple-choice",
+    "prompt": "The Australian environment in the past supported a range of megafauna. These large animals became extinct and have been replaced with smaller species sharing similar characteristics. Which is the most likely explanation for the extinction of the Australian megafauna?",
+    "image": "", "options": [
+      "Smaller animals can survive in a broader range of climatic conditions.",
+      "Humans arrived in Australia and competed with the megafauna for food.",
+      "Smaller species had greater adaptations to travel long distances and could find new food sources when climate change affected the ecosystem.",
+      "Changes in climatic conditions reduced the availability of the megafauna's food source, allowing smaller species, who ate less, to survive."
+    ],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Changes in climatic conditions reduced the availability of the megafauna's food source, allowing smaller species, who ate less, to survive.",
+    "hint": "Consider how a shrinking food supply would favour animals with lower food requirements."
+  },
+  {
+    "module_id": "module-4", "inquiry_id": "4.3", "type": "multiple-choice",
+    "prompt": "The last reliable sighting of the Tasmanian Tiger (Thylacinus cynocephalus) in the wild was in the 1930s, around the same time as the last zoo specimen died. The species, affected by the introduction of humans and their dogs, is considered to no longer be present on Earth. What is the most correct scientific term for this occurrence?",
+    "image": "", "options": ["An extinction event", "An ecological niche", "A predation incident", "An endangered species"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "An extinction event",
+    "hint": "A species that no longer exists anywhere on Earth has undergone extinction."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.3", "type": "multiple-choice",
+    "prompt": "Which of the following best describes microevolutionary changes?",
+    "image": "", "options": ["Changes in species", "Changes in allele frequency", "Changes in DNA structure", "Changes in amino acid structure"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Changes in allele frequency",
+    "hint": "Microevolution is defined as a change in allele frequencies within a population."
+  },
+  {
+    "module_id": "module-3", "inquiry_id": "3.2", "type": "multiple-choice",
+    "prompt": "The Eastern Grey Kangaroo (Macropus giganteus) has dense vascular bundles located near the surface of each of its forearms, allowing blood to flow close to the skin's surface. The kangaroo licks its forearm to aid in evaporative cooling. What type of adaptation is being described?",
+    "image": "Paper_3_img02.png", "options": ["Structural", "Mechanical", "Behavioural", "Physiological"],
+    "bank": null, "pairs": null, "items": null,
+    "answer": "Physiological",
+    "hint": "The internal heat-exchange mechanism (blood flow close to the skin) is the physiological adaptation being tested here."
+  }
+]
