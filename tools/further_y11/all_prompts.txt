@@ -1,0 +1,97 @@
+paper1_mc.json#0 [IMG] The diagram shows a model of the cell membrane, with an integral protein, peripheral protein and lipid bilayer
+paper1_mc.json#1 [   ] Which type of organism is thought to be the earliest life form on Earth?
+paper1_mc.json#2 [   ] Which of the following is an abiotic factor?
+paper1_mc.json#3 [   ] Identify the correct hierarchical structure of organisms.
+paper1_mc.json#4 [   ] What would help cells responsible for exchanging materials to function better?
+paper1_mc.json#5 [   ] What is the function of phloem tissue in plants?
+paper1_mc.json#6 [   ] The movement of substances in the xylem is explained by which of the following theories?
+paper1_mc.json#7 [   ] Which of the following is a physiological adaptation?
+paper1_mc.json#8 [IMG] The image shows four of the Galapagos finches that Charles Darwin observed during the voyage of the HMS Beagle
+paper1_mc.json#9 [IMG] Using the image of Darwin's finches, identify which finch would be best adapted to eating/crushing large seeds
+paper1_mc.json#10 [   ] Which of the following is NOT a level at which biodiversity exists?
+paper1_mc.json#11 [   ] Which type of organism is made up of a group of identical single-celled organisms that are able to conduct all
+paper1_mc.json#12 [   ] Diffusion and osmosis are important in the exchange of gases, water and nutrients in plants. Determine the cor
+paper1_mc.json#13 [   ] Which of the following is NOT an imaging technology that is used to determine plant structure?
+paper1_mc.json#14 [IMG] The photograph shows a cross-section of a stem, with one cluster of cells highlighted. Identify the structure 
+paper1_mc.json#15 [   ] Which of the following has NOT contributed to more accurate pictures of the Earth's history?
+paper1_mc.json#16 [   ] As substances move through the body, their concentrations in the transport medium change. Identify the correct
+paper1_mc.json#17 [   ] During a field-trip, students used quadrats to measure the abundance of Idiospermum australiense in the rainfo
+paper1_mc.json#18 [   ] Use the table below to determine which two species are most closely related.  Species I: TCG GGC CTT GGA Speci
+paper1_mc.json#19 [   ] Identify the correct definitions for Endocytosis, Phagocytosis, Pinocytosis and Exocytosis.  A. Endocytosis: e
+paper1_section2.json#0 [   ] Which statement correctly compares the theories of punctuated equilibrium and Darwin's gradualism?
+paper1_section2.json#1 [   ] Which of the following is a modern example of evolutionary change within a species?
+paper1_section2.json#2 [   ] Which of the following best describes a recent extinction event and a likely cause?
+paper1_section2.json#3 [   ] DNA hybridisation is a form of biochemical evidence for evolution. Which statement correctly describes this te
+paper1_section2.json#4 [   ] Catalase is an enzyme found in potatoes and the human body that breaks down hydrogen peroxide (H2O2) into wate
+paper1_section2.json#5 [   ] In the catalase-temperature investigation above, which of the following variables would most need to be contro
+paper1_section2.json#6 [   ] Which sequence correctly describes the substrate-enzyme action in the 'induced fit' model?
+paper1_section2.json#7 [   ] Students recorded the population density of two species in an ecosystem over 10 years. Species 1's population 
+paper1_section2.json#8 [   ] Intestinal cells lining the small intestine are elongated with many folds. How does this structure allow the c
+paper1_section2.json#9 [   ] Which statement correctly compares gas exchange in autotrophs (plants) and heterotrophs (animals)?
+paper1_section2.json#10 [   ] The introduction of cane toads to Australia is a biotic pressure that has affected native predators such as th
+paper2_mc.json#0 [   ] Which of the following statements about eukaryotic cell organelles is correct?
+paper2_mc.json#1 [   ] Humans chew food to break it down from large pieces into small pieces. What is the main function of this proce
+paper2_mc.json#2 [IMG] The diagram shows the fluid mosaic model of the cell membrane, with a bracket labelled S spanning the full thi
+paper2_mc.json#3 [   ] The table outlines four plant structures (W, X, Y, Z) and their functions: W prevents water loss and allows su
+paper2_mc.json#4 [IMG] The graph shows the effect of changing temperature on the rate of enzyme activity, which rises to a peak aroun
+paper2_mc.json#5 [   ] In the enzyme-temperature experiment above, which of the following shows the correct variables?
+paper2_mc.json#6 [IMG] The diagram shows natural selection of antibiotic resistant bacteria: a mixed population is exposed to antibio
+paper2_mc.json#7 [IMG] Carbon-14 is a radioisotope used for dating biological material, with its remaining amount dropping to near ze
+paper2_mc.json#8 [   ] The table compares prokaryotic and eukaryotic cells. Which of the following is correct?
+paper2_mc.json#9 [   ] The toxicity of cane toads has caused an evolutionary response in some native Australian predators: genes that
+paper2_mc.json#10 [IMG] The diagram shows a common ancestral species splitting into two different descendant species, A and B. Which t
+paper2_mc.json#11 [   ] What is the name given to an organism that can make its own food using carbon dioxide, water and sunlight?
+paper2_mc.json#12 [IMG] A student set up a 100m² grid and counted all dandelions within ten randomly placed 1m² quadrats, finding coun
+paper2_mc.json#13 [   ] Which statement about quadrat sampling is NOT correct?
+paper2_mc.json#14 [   ] Barnacles are often seen growing on whales. The barnacles have a stable place to live, a free ride and access 
+paper2_mc.json#15 [   ] A modification to Darwin's theory of evolution is called punctuated equilibrium. Which of the following suppor
+paper2_mc.json#16 [IMG] The graph shows the population numbers of foxes and hares over 15 years, with fox numbers generally rising and
+paper2_mc.json#17 [IMG] A student compared gas exchange between Elodea (plant) and snails using bromothymol blue, which changes colour
+paper2_section2.json#0 [   ] Which statement correctly compares open and closed circulatory systems?
+paper2_section2.json#1 [   ] Which statement correctly compares arteries, veins and capillaries?
+paper2_section2.json#2 [   ] The fennec fox is a nocturnal desert animal with large, heavily vascularised ears and thick, sand-coloured fur
+paper2_section2.json#3 [   ] The fennec fox's large, heavily vascularised ears help it survive in its hot desert environment. How does this
+paper2_section2.json#4 [   ] A cell has an actual length of 8 μm, and a student's drawing of it is 4 cm long. What is the correct scale of 
+paper2_section2.json#5 [   ] A student modelled the effect of amylase on starch using dialysis tubing (pores 1-10nm), starch (large, can't 
+paper2_section2.json#6 [   ] In the amylase/dialysis tubing experiment above, which of the following correctly identifies the independent a
+paper2_section2.json#7 [   ] In the beaker containing dialysis tubing with amylase and starch, what result would you predict after 30 minut
+paper2_section2.json#8 [   ] Dialysis tubing is often used to model the cell membrane. Which statement best evaluates this as a model?
+paper2_section2.json#9 [   ] Which of the following correctly identifies a difference between the movement of materials in xylem compared t
+paper2_section2.json#10 [   ] Ice cores from Law Dome, Antarctica, show atmospheric CO2 levels were fairly stable from 1000-1800 (around 275
+paper2_section2.json#11 [   ] Many vertebrates (e.g. humans, birds, whales) have a very similar bone structure in their limbs despite lookin
+paper2_section2.json#12 [   ] The Gouldian finch population has declined from hundreds of thousands to about 2,500, due to trapping, land cl
+paper3_mc.json#0 [   ] Which of the following correctly identifies the equipment used to measure each abiotic factor?  A. Temperature
+paper3_mc.json#1 [   ] Which process uses proteins to move molecules against a concentration gradient?
+paper3_mc.json#2 [   ] Which of the following statements about endocytosis and exocytosis is correct?
+paper3_mc.json#3 [IMG] The image shows a cross-section of a leaf, with the outermost layer of cells (both upper and lower surface) la
+paper3_mc.json#4 [   ] In the theory of punctuated equilibrium, what is meant by a 'period of stasis'?
+paper3_mc.json#5 [   ] Heterotrophs differ from autotrophs in their mode of nutrition. Which statement correctly distinguishes them?
+paper3_mc.json#6 [   ] Which of the following is a correct advantage of either an open or closed circulatory system?
+paper3_mc.json#7 [   ] The Cenozoic Era began about 65 million years ago and continues into the present, seeing many changes in Austr
+paper3_mc.json#8 [   ] Natural selection over many generations can result in similar adaptations in unrelated species that live in si
+paper3_mc.json#9 [   ] Which of the following lists three biotic factors that can affect the distribution and abundance of a particul
+paper3_mc.json#10 [   ] Transitional fossil evidence shows that over the past 55 million years the horse has changed. Over time, these
+paper3_mc.json#11 [   ] Where does physical digestion begin?
+paper3_mc.json#12 [   ] Scientists tested a new insecticide on a large population of Anopheles mosquitoes over several generations. In
+paper3_mc.json#13 [   ] Where are the pigment molecules responsible for the process of photosynthesis located?
+paper3_mc.json#14 [IMG] The image shows a population of Black nerite molluscs clustered together at mid to high tide level, on and und
+paper3_mc.json#15 [   ] What is the scientific definition of an adaptation?
+paper3_mc.json#16 [   ] Which of the following would NOT be considered evidence to support the theory of evolution?
+paper3_mc.json#17 [   ] Which of the following is a correct summary of the process of cellular respiration?
+paper3_section2.json#0 [IMG] The electron micrograph (Figure 1) shows an organelle with visible internal stacks of membranes (grana/thylako
+paper3_section2.json#1 [IMG] How is the internal structure of the chloroplast (its stacks of grana/thylakoid membranes) suited to its funct
+paper3_section2.json#2 [IMG] The electron micrograph (Figure 2) shows a small, rod-shaped cell about 2 μm long with no visible membrane-bou
+paper3_section2.json#3 [IMG] In a coastal food web, crabs and Mulberry whelks both eat limpets, while crabs also eat sea urchins. If people
+paper3_section2.json#4 [   ] People selectively removing only the larger sea urchins from a rock platform (leaving smaller ones in crevices
+paper3_section2.json#5 [   ] A red blood cell has a biconcave (dimpled disc) shape with a smooth surface. How does this structure relate to
+paper3_section2.json#6 [   ] Why is cell specialisation essential to the survival of multicellular organisms?
+paper3_section2.json#7 [   ] Which statement best explains how evolutionary change occurs by natural selection, using antibiotic resistance
+paper3_section2.json#8 [   ] What are the names of the transport processes for water and for sugars in a plant?
+paper3_section2.json#9 [   ] Which statement correctly outlines the process that draws water up through the xylem to the leaves?
+paper3_section2.json#10 [   ] Which statement correctly describes the structure of phloem, the tissue used to transport sugars from the leav
+paper3_section2.json#11 [   ] Five 10cm × 10cm quadrats (100cm² each, 500cm² total) were placed on a rock platform and a total of 20 sea urc
+paper3_section2.json#12 [   ] Why are ecologists sometimes unable to get actual (complete) counts of certain organisms when collecting popul
+paper3_section2.json#13 [IMG] Four cube-shaped shapes have side lengths of 1, 2, 1×1×2 and 1×2×2 units. Which shape has the largest surface 
+paper3_section2.json#14 [   ] Why are cells almost always microscopic in size?
+paper3_section2.json#15 [   ] A diagram shows that chicken, pig, monkey and human embryos look nearly identical in early development — all s
+paper3_section2.json#16 [   ] In the phospholipid bilayer of the cell membrane, water can pass through relatively easily, but larger molecul

@@ -3014,6 +3014,99 @@ function LoginCardsPrint({ students, onClose }) {
   );
 }
 
+// Per-student summary for teachers/admins: reuses the same analytics engine
+// as the student's own Progress page, scoped to just this one student's attempts.
+function StudentProfileModal({ code, info, onClose }) {
+  const { attempts, loading } = useMyAttempts(code);
+  const myModules = useMemo(() => modulesForYear(info.year), [info.year]);
+  const a = useMemo(() => computeAnalytics(attempts, myModules), [attempts, myModules]);
+
+  const statBlock = (label, value, caption) => (
+    <div style={{ ...S.card, padding: "12px 14px", textAlign: "center" }}>
+      <div style={{ fontSize: 22, fontWeight: 800, color: C.ink }}>{value}</div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.04em", marginTop: 2 }}>{label}</div>
+      {caption && <div style={{ fontSize: 11, color: C.faint, marginTop: 2 }}>{caption}</div>}
+    </div>
+  );
+
+  return (
+    <div style={S.modal} onClick={onClose}>
+      <div style={{ ...S.modalBox, maxWidth: 620 }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 10 }}>
+          <div>
+            <h3 style={{ margin: "0 0 4px" }}>{info.name}</h3>
+            <p style={{ margin: 0, fontSize: 13, color: C.muted, fontFamily: "monospace" }}>{code} · {info.className || "No class"} · Year {info.year || "—"}</p>
+          </div>
+          <button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm }} onClick={onClose}>Close</button>
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "2.5rem", color: C.muted }}>
+            <div style={{ width: 30, height: 30, margin: "0 auto 12px", border: `3px solid ${C.lineSoft}`, borderTopColor: C.brand, borderRadius: "50%", animation: "bqcSpin .8s linear infinite" }} />
+            Loading progress…
+          </div>
+        ) : !a.sessionCount ? (
+          <div style={{ ...S.card, textAlign: "center", padding: "2rem", color: C.muted }}>This student hasn't completed any practice attempts yet.</div>
+        ) : (
+          <>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: "1.25rem" }}>
+              {statBlock("Accuracy", `${a.accuracy}%`, `${a.totalCorrect}/${a.totalAttempted} correct`)}
+              {statBlock("Sessions", a.sessionCount)}
+              {statBlock("Day streak", a.streak)}
+              {statBlock("Days practised", a.daysPractised)}
+            </div>
+
+            <h4 style={{ ...S.h3, fontSize: 14, marginBottom: 8 }}>By module</h4>
+            <div style={{ overflowX: "auto", marginBottom: "1.25rem" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr><th style={S.th}>Module</th><th style={S.th}>Questions</th><th style={S.th}>Accuracy</th></tr></thead>
+                <tbody>
+                  {myModules.map(m => {
+                    const b = a.byModule[m.id];
+                    const gc = gradientColor(b?.accuracy ?? null);
+                    return (
+                      <tr key={m.id}>
+                        <td style={S.td}>{m.icon} {m.title}</td>
+                        <td style={S.td}>{b?.attempted || 0}</td>
+                        <td style={S.td}>{b?.accuracy != null ? <span style={{ ...S.badge, background: gc.bg, color: gc.text }}>{b.accuracy}%</span> : <span style={{ color: "#ccc" }}>—</span>}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: "1.25rem" }}>
+              <div>
+                <h4 style={{ ...S.h3, fontSize: 14, marginBottom: 8 }}>💪 Strengths</h4>
+                {a.strengths.length ? a.strengths.map(s => (
+                  <div key={s.id} style={{ fontSize: 13, marginBottom: 4 }}>{s.title} <span style={{ color: C.good, fontWeight: 700 }}>{s.accuracy}%</span></div>
+                )) : <p style={{ fontSize: 12.5, color: C.faint, margin: 0 }}>Not enough attempts yet to tell.</p>}
+              </div>
+              <div>
+                <h4 style={{ ...S.h3, fontSize: 14, marginBottom: 8 }}>🎯 Focus areas</h4>
+                {a.focus.length ? a.focus.map(s => (
+                  <div key={s.id} style={{ fontSize: 13, marginBottom: 4 }}>{s.title} <span style={{ color: C.bad, fontWeight: 700 }}>{s.accuracy}%</span></div>
+                )) : <p style={{ fontSize: 12.5, color: C.faint, margin: 0 }}>Not enough attempts yet to tell.</p>}
+              </div>
+            </div>
+
+            <h4 style={{ ...S.h3, fontSize: 14, marginBottom: 8 }}>Recent activity</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {[...a.series].reverse().slice(0, 8).map(s => (
+                <div key={s.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, padding: "5px 0", borderBottom: `1px solid ${C.lineSoft}` }}>
+                  <span style={{ color: C.muted }}>{s.at.toLocaleDateString()}</span>
+                  <span>{s.correct}/{s.attempted} correct ({s.accuracy}%)</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AdminStudents({ users, usersApi }) {
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ code: "", name: "", className: "", year: "" });
@@ -3022,6 +3115,7 @@ function AdminStudents({ users, usersApi }) {
   const [bulkErr, setBulkErr] = useState("");
   const [selected, setSelected] = useState([]);
   const [printCards, setPrintCards] = useState(null); // array of {code, name} or null
+  const [profileCode, setProfileCode] = useState(null);
   const [yearFilter, setYearFilter] = useState("all");
   const [classFilter, setClassFilter] = useState("all");
   const [sort, setSort] = useState({ field: "code", dir: "asc" });
@@ -3137,7 +3231,12 @@ function AdminStudents({ users, usersApi }) {
                 <td style={S.td}>{users[code].name}</td>
                 <td style={S.td}>{users[code].className}</td>
                 <td style={S.td}>{users[code].year}</td>
-                <td style={S.td}><button style={{ ...S.btn, ...S.btnDanger, ...S.btnSm }} onClick={() => { if (confirm(`Remove ${code}?`)) usersApi.removeUser(code); }}>Remove</button></td>
+                <td style={S.td}>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm }} onClick={() => setProfileCode(code)}>Profile</button>
+                    <button style={{ ...S.btn, ...S.btnDanger, ...S.btnSm }} onClick={() => { if (confirm(`Remove ${code}?`)) usersApi.removeUser(code); }}>Remove</button>
+                  </div>
+                </td>
               </tr>
             ))}
             {filteredCodes.length === 0 && <tr><td style={S.td} colSpan={6}><span style={{ color: "#aaa" }}>No students match this filter.</span></td></tr>}
@@ -3180,6 +3279,7 @@ function AdminStudents({ users, usersApi }) {
       )}
 
       {printCards && <LoginCardsPrint students={printCards} onClose={() => setPrintCards(null)} />}
+      {profileCode && <StudentProfileModal code={profileCode} info={users[profileCode]} onClose={() => setProfileCode(null)} />}
     </div>
   );
 }
@@ -3308,6 +3408,107 @@ function AdminProgress({ users }) {
   );
 }
 
+// ─── TEACHER VIEW (read-only, no login) ────────────────────────────────────────
+// Reachable only via an obscure, unguessable URL (see TEACHER_VIEW_PATH below) --
+// no auth screen. Shows the same student login details + progress data as the
+// admin panel's Students/Progress tabs, but with every write action (add, bulk
+// import, remove, print cards, class delete) stripped out. Never link to this
+// path from anywhere in the app itself.
+function TeacherStudents({ users }) {
+  const [yearFilter, setYearFilter] = useState("all");
+  const [classFilter, setClassFilter] = useState("all");
+  const [sort, setSort] = useState({ field: "code", dir: "asc" });
+  const [profileCode, setProfileCode] = useState(null);
+
+  const codes = Object.keys(users).sort();
+  const allYears = useMemo(() => [...new Set(codes.map(c => String(users[c].year || "").trim()).filter(Boolean))].sort(), [users]);
+  const allClasses = useMemo(() => [...new Set(codes.map(c => users[c].className).filter(Boolean))].sort(), [users]);
+
+  const toggleSort = (field) => setSort(s => s.field === field ? { field, dir: s.dir === "asc" ? "desc" : "asc" } : { field, dir: "asc" });
+  const sortArrow = (field) => sort.field !== field ? "" : (sort.dir === "asc" ? " ▲" : " ▼");
+  const sortableTh = (field, label) => (
+    <th style={{ ...S.th, cursor: "pointer", userSelect: "none" }} onClick={() => toggleSort(field)}>{label}{sortArrow(field)}</th>
+  );
+
+  const filteredCodes = useMemo(() => {
+    const field = { code: c => c, name: c => users[c].name, className: c => users[c].className, year: c => users[c].year }[sort.field] || (c => c);
+    return codes
+      .filter(c => (yearFilter === "all" || String(users[c].year || "").trim() === yearFilter) && (classFilter === "all" || users[c].className === classFilter))
+      .sort((a, b) => {
+        const cmp = String(field(a) || "").localeCompare(String(field(b) || ""), undefined, { numeric: true, sensitivity: "base" });
+        return sort.dir === "asc" ? cmp : -cmp;
+      });
+  }, [codes, users, yearFilter, classFilter, sort]);
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 10, marginBottom: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
+        <select style={{ ...S.input, width: "auto", minWidth: 140 }} value={yearFilter} onChange={e => setYearFilter(e.target.value)}>
+          <option value="all">All years</option>
+          {allYears.map(y => <option key={y} value={y}>Year {y}</option>)}
+        </select>
+        <select style={{ ...S.input, width: "auto", minWidth: 160 }} value={classFilter} onChange={e => setClassFilter(e.target.value)}>
+          <option value="all">All classes</option>
+          {allClasses.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <span style={{ fontSize: 12.5, color: "#888" }}>{filteredCodes.length} of {codes.length} students</span>
+      </div>
+
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              {sortableTh("code", "Login Code")}
+              {sortableTh("name", "Name")}
+              {sortableTh("className", "Class")}
+              {sortableTh("year", "Year")}
+              <th style={S.th}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredCodes.map(code => (
+              <tr key={code}>
+                <td style={{ ...S.td, fontFamily: "monospace", fontWeight: 700 }}>{code}</td>
+                <td style={S.td}>{users[code].name}</td>
+                <td style={S.td}>{users[code].className}</td>
+                <td style={S.td}>{users[code].year}</td>
+                <td style={S.td}><button style={{ ...S.btn, ...S.btnOutline, ...S.btnSm }} onClick={() => setProfileCode(code)}>Profile</button></td>
+              </tr>
+            ))}
+            {filteredCodes.length === 0 && <tr><td style={S.td} colSpan={5}><span style={{ color: "#aaa" }}>No students match this filter.</span></td></tr>}
+          </tbody>
+        </table>
+      </div>
+      {profileCode && <StudentProfileModal code={profileCode} info={users[profileCode]} onClose={() => setProfileCode(null)} />}
+    </div>
+  );
+}
+
+function TeacherView({ users }) {
+  const [tab, setTab] = useState("students");
+  return (
+    <div style={{ minHeight: "100vh", background: C.canvas, fontFamily: FONT }}>
+      <style>{GLOBAL_CSS}</style>
+      <div style={S.cont}>
+        <div style={{ marginBottom: "1.5rem" }}>
+          <h1 style={S.h1}>🧬 {SCHOOL_NAME}</h1>
+          <p style={{ ...S.sub, marginTop: 6 }}>Read-only teacher view — student login details and practice progress. This page has no editing ability and needs no login; please don't share this link outside teaching staff.</p>
+        </div>
+        <div style={{ display: "flex", gap: 8, marginBottom: "1.5rem" }}>
+          <button style={S.tabBtn(tab === "students")} onClick={() => setTab("students")}>Students</button>
+          <button style={S.tabBtn(tab === "progress")} onClick={() => setTab("progress")}>Progress</button>
+        </div>
+        {tab === "students" && <TeacherStudents users={users} />}
+        {tab === "progress" && <AdminProgress users={users} />}
+      </div>
+    </div>
+  );
+}
+
+// Obscure, unguessable path -- this is the only "access control" for TeacherView.
+// Do not link to this from anywhere else in the app.
+const TEACHER_VIEW_PATH = "/teacher-view/drVVlcPL7r0qa4x0dsBNwVSy";
+
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
 export default function App() {
   const questionsApi = useQuestions();
@@ -3319,6 +3520,18 @@ export default function App() {
   const [session, setSession] = useState(null); // { scopeType, scopeId, scopeLabel, color, count, key }
 
   const logout = () => { setUser(null); setPage("login"); setActiveModule(null); setSession(null); };
+
+  // Obscure-link teacher view -- checked first, independent of login/admin state,
+  // and only waits on student data (not the question bank).
+  if (typeof window !== "undefined" && window.location.pathname.replace(/\/$/, "") === TEACHER_VIEW_PATH) {
+    if (usersApi.loading) return (
+      <div style={{ minHeight: "100vh", background: C.canvas, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT, color: C.muted, fontWeight: 600 }}>
+        <style>{GLOBAL_CSS}</style>
+        Loading…
+      </div>
+    );
+    return <TeacherView users={usersApi.users} />;
+  }
 
   if (questionsApi.loading || usersApi.loading) return (
     <div style={{ minHeight: "100vh", background: C.canvas, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: FONT, color: C.muted, gap: 16, fontWeight: 600 }}>
