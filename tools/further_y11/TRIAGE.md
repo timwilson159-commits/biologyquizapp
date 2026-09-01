@@ -91,9 +91,8 @@ document order — a lesson from the last batch, where several images were misma
 to questions). Every image referenced in the staged JSON exists and was visually
 verified to match its question and answer.
 
-## Next step
-This is a **preview only** — nothing has been inserted or pushed. Once you've reviewed
-`preview.html` and are happy with the question set (and the 4 flagged MC drops above),
-the remaining steps are the same as every prior batch: upload the referenced images to
-the `question-images` bucket, resolve them into DB-ready rows, then insert — only with
-your explicit go-ahead.
+## Status: LIVE (pushed 2026-09-02)
+All 97 questions above are live in the `questions` table (via `tools/stage_further_y11.cjs`
++ `insert_hsc_rows.cjs`, images uploaded to the `question-images` bucket under the
+`further-y11/` prefix). Live count went from 2008 to 2105. This folder and
+`tools/pending_insert/further-y11-*.json` are now historical staging records.
